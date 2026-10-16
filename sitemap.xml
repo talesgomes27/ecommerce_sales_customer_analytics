@@ -1,55 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/05-implementation-plan.html</loc>
-    <lastmod>2026-10-16T16:53:59.235Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/02-PRD-and-specs.html</loc>
-    <lastmod>2026-10-16T16:53:59.235Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/04-scaffolding-and-conventions.html</loc>
-    <lastmod>2026-10-16T16:53:59.235Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/adr/0001-pipeline-and-feature-store-architecture.html</loc>
-    <lastmod>2026-10-16T16:53:59.235Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/adr/0002-modelling-and-evaluation-strategy.html</loc>
-    <lastmod>2026-10-16T16:53:59.236Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/index.html</loc>
-    <lastmod>2026-10-16T16:53:59.236Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/task.html</loc>
-    <lastmod>2026-10-16T16:53:59.258Z</lastmod>
-  </url>
-  <url>
     <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/CHANGELOG.html</loc>
-    <lastmod>2026-10-16T16:53:59.233Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/reports/index.html</loc>
-    <lastmod>2026-10-16T16:53:59.256Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/adr/0003-quarto-storytelling-and-publication-standard.html</loc>
-    <lastmod>2026-10-16T16:53:59.236Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/03-architecture-and-schema.html</loc>
-    <lastmod>2026-10-16T16:53:59.235Z</lastmod>
-  </url>
-  <url>
-    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/00_archetype.html</loc>
-    <lastmod>2026-10-16T16:53:59.235Z</lastmod>
+    <lastmod>2026-10-16T17:08:01.879Z</lastmod>
   </url>
   <url>
     <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/01-data-discovery-and-contracts.html</loc>
-    <lastmod>2026-10-16T16:53:59.235Z</lastmod>
+    <lastmod>2026-10-16T17:08:01.880Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/00_archetype.html</loc>
+    <lastmod>2026-10-16T17:08:01.880Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/03-architecture-and-schema.html</loc>
+    <lastmod>2026-10-16T17:08:01.880Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/adr/0003-quarto-storytelling-and-publication-standard.html</loc>
+    <lastmod>2026-10-16T17:08:01.881Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/reports/index.html</loc>
+    <lastmod>2026-10-16T17:08:01.895Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/index.html</loc>
+    <lastmod>2026-10-16T17:08:01.881Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/adr/0002-modelling-and-evaluation-strategy.html</loc>
+    <lastmod>2026-10-16T17:08:01.881Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/adr/0001-pipeline-and-feature-store-architecture.html</loc>
+    <lastmod>2026-10-16T17:08:01.880Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/04-scaffolding-and-conventions.html</loc>
+    <lastmod>2026-10-16T17:08:01.880Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/02-PRD-and-specs.html</loc>
+    <lastmod>2026-10-16T17:08:01.880Z</lastmod>
+  </url>
+  <url>
+    <loc>https://talesgomes27.github.io/ecommerce_sales_customer_analytics/docs/05-implementation-plan.html</loc>
+    <lastmod>2026-10-16T17:08:01.880Z</lastmod>
   </url>
 </urlset>
