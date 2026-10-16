@@ -15,8 +15,24 @@ htmlcov/
 
 # Quarto build outputs and cache
 /.quarto/
-_freeze/
 _site/
+
+# Binary data, models, and databases
+*.parquet
+*.feather
+*.pkl
+*.joblib
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+
 
 # Jupyter & Editor files
 .ipynb_checkpoints/

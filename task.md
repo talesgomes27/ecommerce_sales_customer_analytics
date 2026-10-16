@@ -76,6 +76,33 @@
     - [x] `fig_08_model_calibration_and_cost_curve.png`: Curva de calibração (Brier = 0,0893) e curva de custo total por limiar $\tau$
     - [x] Tabela metodológica dos gates da esteira analítica (`@tbl-methodology`)
     - [x] Tabela de simulação de custos operacionais por limiar de decisão (`@tbl-threshold-costs`)
-    - [x] Tabela diagnóstica e plano de contenção de devoluções no fulfillment (`@tbl-returns-action`)
   - [x] Checkpoint: Entrega e publicação validadas com sucesso
+
+---
+
+## 3. Fase de Release & Ops (`release-and-ops-pipeline`) — [EM ANDAMENTO]
+
+- [x] **Gate 1: Saneamento de Repositório, Segurança Pré-Push & Lockfiles**
+  - [x] Blindagem do `.gitignore` contra modelos e arquivos temporários
+  - [x] Varredura contra credenciais e segredos vazados (0 ocorrências)
+  - [x] Varredura contra arquivos > 50MB (0 arquivos excedentes)
+  - [x] Validação de integridade e sincronismo do `uv.lock`
+  - [x] Checkpoint: Saneamento aprovado
+- [x] **Gate 2: Governança Git, Versionamento Semântico & Changelog**
+  - [x] Definição de versão SemVer `v1.0.0`
+  - [x] Elaboração do `CHANGELOG.md` no padrão *Keep a Changelog*
+  - [x] Checkpoint: Histórico e changelog validados
+- [x] **Gate 3: Automação de CI/CD — GitHub Actions**
+  - [x] Criação de `.github/workflows/ci.yml` (linter Ruff e suíte Pytest via uv)
+  - [x] Criação de `.github/workflows/publish.yml` (render e deploy Quarto para GitHub Pages)
+  - [x] Checkpoint: Workflows de automação configurados
+- [/] **Gate 4: Deploy, Publicação & Empacotamento**
+  - [x] Criação do arquivo de guarda `.nojekyll` em `_site/`
+  - [x] Compilação estática do site via `quarto render`
+  - [ ] Push remoto para o GitHub (Aguardando autorização explícita do usuário)
+- [x] **Gate 5: Smoke Tests & Verificação Pós-Deploy**
+  - [x] Smoke test das 9 figuras relativas no HTML: 100% íntegras (0 quebradas)
+  - [x] Suíte completa de 16 testes passando em verde
+  - [x] Linter Ruff 100% limpo
+
 
