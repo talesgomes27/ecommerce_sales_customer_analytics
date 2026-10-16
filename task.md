@@ -2,7 +2,7 @@
 
 **Arquétipo:** A (Data Science, Analytics & ML — CRISP-ML(Q) + Data Storytelling)  
 **Stack Primária:** Python 3.12+ (`uv`) + Quarto CLI (`.qmd`) + Ruff + Pytest  
-**Status Atual:** Pré-Código e Execução Técnica 100% Concluídos. Relatório e Site Compilados com Sucesso.
+**Status Atual:** Projeto 100% Homologado e Publicado em Produção (GitHub Pages).
 
 ---
 
@@ -80,7 +80,7 @@
 
 ---
 
-## 3. Fase de Release & Ops (`release-and-ops-pipeline`) — [EM ANDAMENTO]
+## 3. Fase de Release & Ops (`release-and-ops-pipeline`) — [CONCLUÍDA]
 
 - [x] **Gate 1: Saneamento de Repositório, Segurança Pré-Push & Lockfiles**
   - [x] Blindagem do `.gitignore` contra modelos, arquivos temporários e datasets brutos (`data/raw/`)
@@ -97,16 +97,21 @@
 - [x] **Gate 3: Automação de CI/CD — GitHub Actions**
   - [x] Criação de `.github/workflows/ci.yml` (linter Ruff e suíte Pytest via uv)
   - [x] Criação de `.github/workflows/publish.yml` (render e deploy Quarto para GitHub Pages)
+  - [x] Execução do CI no GitHub Actions aprovada em 19s
   - [x] Checkpoint: Workflows de automação configurados
-- [/] **Gate 4: Deploy, Publicação & Empacotamento**
-  - [x] Criação do arquivo de guarda `.nojekyll` em `_site/`
-  - [x] Compilação estática do site via `quarto render` com `_freeze/`
-  - [ ] Push remoto para o GitHub (Aguardando autorização explícita do usuário)
+- [x] **Gate 4: Deploy, Publicação & Empacotamento**
+  - [x] Criação do repositório público `talesgomes27/ecommerce_sales_customer_analytics` no GitHub
+  - [x] Push da branch `main` e tag `v1.0.0`
+  - [x] Criação e publicação da branch `gh-pages` com compilação Quarto
+  - [x] Workflow de publicação no GitHub Actions concluído com sucesso
 - [x] **Gate 5: Smoke Tests & Verificação Pós-Deploy**
   - [x] Smoke test das 9 figuras relativas no HTML: 100% íntegras (0 quebradas)
   - [x] Auditoria estrutural das 10 tabelas `great_tables` no HTML compilado
-  - [x] Suíte completa de 26 testes passando em verde
+  - [x] Suíte completa de 26 testes passando em verde no GitHub Actions e localmente
   - [x] Linter Ruff 100% limpo
+  - [x] Healthcheck HTTP 200 na URL pública: `https://talesgomes27.github.io/ecommerce_sales_customer_analytics/`
+  - [x] Healthcheck HTTP 200 no Relatório Executivo: `https://talesgomes27.github.io/ecommerce_sales_customer_analytics/reports/`
+
 
 
 
