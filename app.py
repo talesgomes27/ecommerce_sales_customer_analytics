@@ -1,5 +1,7 @@
 """Aplicação interativa Streamlit para simulação de cenários What-If de precificação e risco operacional."""
 
+from datetime import datetime
+
 import pandas as pd
 import streamlit as st
 
@@ -10,6 +12,7 @@ from src.core.schemas import (
     SimulationScenarioInput,
 )
 from src.core.simulator import BusinessScenarioSimulator
+from src.reports.executive_pdf import ExecutivePdfError, generate_executive_pdf_bytes
 from src.ui.charts import (
     plot_discount_sensitivity_curve,
     plot_waterfall_cost_breakdown,
@@ -294,7 +297,63 @@ else:
         f"caixa líquido devido à sobreposição de CMV, frete, impostos e custos reversos."
     )
 
-# 9. Abas de Análise Visual e Tabular
+# 9. Governança e Exportação Executiva (One-Pager Typst)
+st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+scenario_dict = {
+    "unit_price": float(unit_price),
+    "unit_cost": float(unit_cost),
+    "quantity": int(quantity),
+    "discount_pct": float(discount_pct),
+    "shipping_cost": float(shipping_cost),
+    "tax_rate": float(tax_rate),
+    "delivery_days": int(delivery_days),
+    "reverse_logistics_cost": float(reverse_logistics_cost),
+    "category": category.value if hasattr(category, "value") else str(category),
+    "channel": channel.value if hasattr(channel, "value") else str(channel),
+    "gross_revenue": result.gross_revenue,
+    "net_revenue": result.net_revenue,
+    "total_cost": result.total_cost,
+    "contribution_margin_value": result.contribution_margin_value,
+    "contribution_margin_pct": result.contribution_margin_pct,
+    "break_even_discount": result.break_even_discount,
+    "estimated_return_rate": result.estimated_return_rate,
+    "estimated_cancellation_rate": result.estimated_cancellation_rate,
+    "risk_alert": result.risk_alert,
+}
+
+pdf_bytes: bytes | None = None
+pdf_error: str | None = None
+try:
+    pdf_bytes = generate_executive_pdf_bytes(scenario_dict)
+except ExecutivePdfError as e:
+    pdf_error = str(e)
+except Exception as e:
+    pdf_error = f"Erro inesperado na geração documental: {e}"
+
+col_doc_info, col_doc_btn = st.columns([3, 2])
+with col_doc_info:
+    st.markdown(
+        "<div style='padding-top: 6px; color: #475569; font-size: 0.88rem;'>"
+        "📋 <b>Governança de Pricing:</b> Exporte o memorando formal de uma página (One-Pager A4) "
+        "com parâmetros de lote, KPIs e parecer sanitário compilado via Typst."
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+with col_doc_btn:
+    if pdf_bytes is not None:
+        st.download_button(
+            label="📄 Baixar Parecer Executivo em PDF",
+            data=pdf_bytes,
+            file_name=f"parecer_pricing_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+            help="Compila instantaneamente o parecer em documento executivo via Typst.",
+        )
+    else:
+        st.error(f"⚠️ Indisponibilidade momentânea na emissão do PDF: {pdf_error}")
+
+# 10. Abas de Análise Visual e Tabular
 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 tab_curve, tab_dre, tab_matrix = st.tabs(
     [

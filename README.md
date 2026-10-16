@@ -6,7 +6,7 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Package Manager: uv](https://img.shields.io/badge/uv-fast-blueviolet.svg)](https://github.com/astral-sh/uv)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Tests: 34 passed](https://img.shields.io/badge/tests-34%20passed-success.svg)](tests/)
+[![Tests: 40 passed](https://img.shields.io/badge/tests-40%20passed-success.svg)](tests/)
 
 Plataforma de inteligência de vendas, diagnóstico de margem de contribuição e simulação de cenários operacionais para comércio eletrônico. Integra auditoria rigorosa de contratos de dados, modelagem de propensão com calibração orientada a custo financeiro e um motor de simulação de decisões desacoplado da interface gráfica.
 
@@ -46,8 +46,8 @@ flowchart LR
 
 ### 3. Apoio à Decisão: Simulador What-If Desacoplado
 * **Motor de Cálculo Puro (`src/core/`):** Implementação sem frameworks de UI, sustentada exclusivamente em Pydantic v2 e NumPy/Pandas.
-* **Provisão Dinâmica de Risco Operacional:** Incorporação de probabilidade condicional de devolução e cancelamento calibrada pelo prazo de entrega prometido (`Delivery_Days`) e faixa de desconto.
 * **Análise de Break-Even:** Cálculo instantâneo do ponto de equilíbrio $\text{Desconto}^*$ no qual a margem de contribuição unitária é reduzida a zero após custos mercantis, tributários, de frete e reversos.
+* **Exportação Executiva em PDF (One-Pager Typst):** Compilação nativa em memória (< 0,1s) de parecer formal em PDF A4 contendo parâmetros do lote, KPIs de rentabilidade e parecer sanitário de risco.
 
 ---
 
@@ -89,9 +89,12 @@ ecommerce_sales_customer_analytics/
 │   ├── evaluation/             # Métricas analíticas e tabelas executivas Great Tables
 │   ├── features/               # Engenharia de atributos point-in-time e cálculo RFM
 │   ├── models/                 # Modelos de classificação, clustering e elasticidade
+│   ├── reports/                # Parecer executivo em PDF (One-Pager compilado via Typst)
+│   │   └── executive_pdf.py    # Gerador de PDF em memória com tratamento de exceções
 │   └── ui/                     # Componentes visuais e gráficos interativos Plotly
-├── tests/                      # Suíte de 34 testes automatizados (Pytest)
+├── tests/                      # Suíte de 40 testes automatizados (Pytest)
 │   ├── test_contracts.py       # Validação de integridade de dados e álgebra contábil
+│   ├── test_executive_pdf.py   # Testes unitários de compilação e integridade do PDF
 │   ├── test_features.py        # Testes de separação temporal e ausência de lookahead
 │   ├── test_models.py          # Testes de clustering RFM e treino de classificadores
 │   ├── test_simulator.py       # Testes unitários do motor What-If e break-even
@@ -104,9 +107,9 @@ ecommerce_sales_customer_analytics/
 ```
 
 ### Decisões Arquiteturais Chave
-1. **Zero Acoplamento no Domínio:** `src/core/` não importa Streamlit, Plotly ou Matplotlib. Pode ser importado diretamente por workers assíncronos, APIs REST (FastAPI) ou rotinas de batch.
+1. **Zero Acoplamento no Domínio:** `src/core/` não importa Streamlit, Plotly, Typst ou Matplotlib. Pode ser importado diretamente por workers assíncronos, APIs REST (FastAPI) ou rotinas de batch.
 2. **Contratos Imutáveis e Validados:** Tipos, limites físicos (ex.: descontos restritos a `[0.0, 0.90]`) e valores categóricos são validados em tempo de execução via Pydantic v2.
-3. **Padrão de Ferramental Moderno:** Gestão estrita via `uv`, eliminando arquivos legados de ambiente (`requirements.txt`, `conda.yaml`) em favor do `pyproject.toml`.
+3. **Padrão de Ferramental Moderno:** Gestão estrita via `uv`, eliminando arquivos legados de ambiente (`conda.yaml`) em favor do `pyproject.toml`.
 
 ---
 
@@ -120,6 +123,7 @@ ecommerce_sales_customer_analytics/
 | **Contratos e Validação de Esquema** | `Pandera (Polars)`, `Pydantic v2` |
 | **Machine Learning & Estatística** | `LightGBM`, `XGBoost`, `Scikit-Learn`, `SciPy`, `Statsmodels` |
 | **Motor de Apresentação e Relatório** | `Quarto CLI`, `Great Tables` |
+| **Documentação Executiva & Exportação** | `Typst` (binding Python nativo v0.15) |
 | **Interface Interativa & Gráficos** | `Streamlit`, `Plotly` |
 | **Qualidade de Código & Testes** | `Pytest`, `Pytest-Cov`, `Ruff` |
 | **Orquestração de Tarefas Locais** | `Just` (`rust-just`) |
