@@ -24,6 +24,8 @@ data/raw/
 *.feather
 *.pkl
 *.joblib
+!models/*.joblib
+!models/*.json
 *.db
 *.sqlite
 *.sqlite3

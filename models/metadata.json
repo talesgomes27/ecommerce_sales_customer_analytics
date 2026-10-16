@@ -1,0 +1,88 @@
+{
+  "model_name": "LightGBM At-Purchase Preventative Classifier",
+  "model_version": "1.0.0",
+  "trained_at": "2026-10-16T21:58:24.399930+00:00",
+  "training_timestamp_utc": "2026-10-16T21:58:24.399930+00:00",
+  "training_cutoff_date": "2025-01-01",
+  "training_samples_count": 110518,
+  "test_samples_count": 27598,
+  "base_rate_real": 0.130372,
+  "tau_optimal": 0.55,
+  "tau_optimal_balanced": 0.55,
+  "tau_optimal_calibrated": 0.154857,
+  "optimal_cost_threshold_tau": 0.55,
+  "metrics": {
+    "roc_auc": 0.9037,
+    "pr_auc": 0.6346,
+    "brier_score": 0.1674,
+    "base_rate": 0.1304,
+    "f1_at_tau": 0.5633,
+    "optimal_f1": 0.5633,
+    "optimal_precision": 0.4343,
+    "optimal_recall": 0.8013
+  },
+  "metrics_out_of_time_2025": {
+    "roc_auc": 0.9037,
+    "pr_auc": 0.6346,
+    "brier_score": 0.1674,
+    "base_rate": 0.1304,
+    "f1_at_tau": 0.5633,
+    "optimal_f1": 0.5633,
+    "optimal_precision": 0.4343,
+    "optimal_recall": 0.8013
+  },
+  "numeric_cols": [
+    "customer_age",
+    "quantity",
+    "gross_sales",
+    "tax_amount",
+    "shipping_cost",
+    "product_cost",
+    "orders_count_prior",
+    "spend_prior",
+    "days_since_last_order"
+  ],
+  "categorical_cols": [
+    "gender",
+    "customer_segment",
+    "region",
+    "sales_channel",
+    "marketing_channel",
+    "payment_method",
+    "shipping_method",
+    "warehouse"
+  ],
+  "numeric_features": [
+    "customer_age",
+    "quantity",
+    "gross_sales",
+    "tax_amount",
+    "shipping_cost",
+    "product_cost",
+    "orders_count_prior",
+    "spend_prior",
+    "days_since_last_order"
+  ],
+  "categorical_features": [
+    "gender",
+    "customer_segment",
+    "region",
+    "sales_channel",
+    "marketing_channel",
+    "payment_method",
+    "shipping_method",
+    "warehouse"
+  ],
+  "runtime_versions": {
+    "sklearn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "joblib": "1.6.0",
+    "python": "3.14.6"
+  },
+  "sklearn_version": "1.9.1",
+  "lightgbm_version": "4.7.0",
+  "joblib_version": "1.6.0",
+  "sha256_dataset": "47bc12caaf1974c8a550bb2963e61c431b124265fa3b6b190c5b1c9c75b4bb10",
+  "primary_dataset_file": "ecommerce_sales_customer_analytics_150k.csv",
+  "primary_dataset_sha256": "47bc12caaf1974c8a550bb2963e61c431b124265fa3b6b190c5b1c9c75b4bb10"
+}

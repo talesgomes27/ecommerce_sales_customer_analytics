@@ -31,9 +31,22 @@ def _escape_typst(text: str) -> str:
     )
 
 
-def _build_typst_content(scenario: dict[str, Any]) -> str:
+def _build_typst_content(scenario: dict[str, Any], risk_source: str | None = None) -> str:
     """Constrói o código fonte Typst inline para o One-Pager executivo."""
     now_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    # Extração da fonte de risco (ML ou Heurística)
+    resolved_source = str(scenario.get("risk_source", risk_source or "Heurística"))
+    if resolved_source.startswith("ML") or resolved_source == "ML":
+        risk_source_badge = "ML (τ\\* = 0.1549)"
+        risk_source_detail = (
+            "Modelo: LightGBM At-Purchase v1.0.0 · τ\\* calibrado = 0.1549 · Treinado em 2021–2024"
+        )
+        canc_display_kpi = "n/d (risco agregado no ML)"
+    else:
+        risk_source_badge = "Heurística"
+        risk_source_detail = "Heurística calibrada (médias históricas + deltas de categoria/canal)"
+        canc_display_kpi = None  # será preenchido após cálculo de canc_display
 
     # Extração e saneamento dos parâmetros de entrada
     unit_price = float(scenario.get("unit_price", 1200.0))
@@ -64,6 +77,8 @@ def _build_typst_content(scenario: dict[str, Any]) -> str:
     folga_display = f"{diff_be:+.1f}%"
     return_display = f"{return_rate * 100.0:.1f}%"
     canc_display = f"{canc_rate * 100.0:.1f}%"
+    if canc_display_kpi is None:
+        canc_display_kpi = f"{canc_display} Canc."
 
     # Definição do alerta e paleta semântica
     if "SAFE" in risk_alert or cm_val > 0 and diff_be >= 5.0:
@@ -130,11 +145,15 @@ def _build_typst_content(scenario: dict[str, Any]) -> str:
     #text(size: 15pt, weight: "bold", fill: rgb("#1e3a8a"))[Parecer Executivo de Cenário Comercial]
     #v(2pt)
     #text(size: 8.5pt, fill: rgb("#475569"))[E-Commerce Sales & Customer Analytics · Motor What-If]
+    #v(2pt)
+    #text(size: 8pt, fill: rgb("#64748b"))[Modo de inferência: *{risk_source_badge}* · {risk_source_detail}]
   ],
   align(right + top)[
     #text(size: 8pt, fill: rgb("#64748b"))[Emissão: {now_str}]
     #v(1pt)
     #text(size: 8pt, fill: rgb("#64748b"))[Ambiente: Produção (v1.0.0)]
+    #v(1pt)
+    #text(size: 8pt, weight: "bold", fill: rgb("#2563eb"))[Modo: {risk_source_badge}]
   ]
 )
 
@@ -192,7 +211,7 @@ def _build_typst_content(scenario: dict[str, Any]) -> str:
     #v(3pt)
     #text(size: 12.5pt, weight: "bold", fill: rgb("#d97706"))[{return_display} Dev.]
     #v(2pt)
-    #text(size: 7.5pt, fill: rgb("#d97706"))[{canc_display} Canc.]
+    #text(size: 7.5pt, fill: rgb("#d97706"))[{canc_display_kpi}]
   ]
 )
 
@@ -228,12 +247,15 @@ def _build_typst_content(scenario: dict[str, Any]) -> str:
 """
 
 
-def generate_executive_pdf(scenario: dict[str, Any], output_path: str | Path) -> Path:
+def generate_executive_pdf(
+    scenario: dict[str, Any], output_path: str | Path, risk_source: str = "Heurística"
+) -> Path:
     """Gera um parecer executivo em PDF (One-Pager) a partir dos dados do cenário simulado.
 
     Args:
         scenario: Dicionário contendo os parâmetros de entrada e KPIs da simulação.
         output_path: Caminho de destino para salvar o arquivo PDF.
+        risk_source: Modo de inferência empregado ("Heurística" ou "ML").
 
     Returns:
         Path do arquivo PDF compilado.
@@ -246,7 +268,7 @@ def generate_executive_pdf(scenario: dict[str, Any], output_path: str | Path) ->
 
     temp_path: Path | None = None
     try:
-        typst_code = _build_typst_content(scenario)
+        typst_code = _build_typst_content(scenario, risk_source=risk_source)
 
         temp_file = tempfile.NamedTemporaryFile(
             suffix=".typ", mode="w", encoding="utf-8", delete=False
@@ -277,11 +299,14 @@ def generate_executive_pdf(scenario: dict[str, Any], output_path: str | Path) ->
                 pass
 
 
-def generate_executive_pdf_bytes(scenario: dict[str, Any]) -> bytes:
+def generate_executive_pdf_bytes(
+    scenario: dict[str, Any], risk_source: str = "Heurística"
+) -> bytes:
     """Gera o parecer executivo em PDF e retorna diretamente os bytes compilados.
 
     Args:
         scenario: Dicionário contendo os parâmetros e resultados do cenário.
+        risk_source: Modo de inferência empregado ("Heurística" ou "ML").
 
     Returns:
         Bytes brutos do documento PDF.
@@ -293,7 +318,7 @@ def generate_executive_pdf_bytes(scenario: dict[str, Any]) -> bytes:
         tmp_pdf_path = Path(tmp_pdf.name)
 
     try:
-        generate_executive_pdf(scenario, tmp_pdf_path)
+        generate_executive_pdf(scenario, tmp_pdf_path, risk_source=risk_source)
         return tmp_pdf_path.read_bytes()
     finally:
         if tmp_pdf_path.exists():

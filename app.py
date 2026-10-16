@@ -12,11 +12,79 @@ from src.core.schemas import (
     SimulationScenarioInput,
 )
 from src.core.simulator import BusinessScenarioSimulator
+from src.models.inference import RiskModelInference
+from src.models.schemas import RiskScenarioInput
 from src.reports.executive_pdf import ExecutivePdfError, generate_executive_pdf_bytes
 from src.ui.charts import (
     plot_discount_sensitivity_curve,
     plot_waterfall_cost_breakdown,
 )
+
+# Mapeamento AcquisitionChannel → marketing_channel (valores do dataset de treino)
+CHANNEL_TO_MARKETING: dict[AcquisitionChannel, str] = {
+    AcquisitionChannel.DIRECT: "Direct",
+    AcquisitionChannel.ORGANIC_SEARCH: "Organic Search",
+    AcquisitionChannel.PAID_SEARCH: "Google Ads",
+    AcquisitionChannel.SOCIAL_MEDIA: "Facebook Ads",
+    AcquisitionChannel.EMAIL: "Email Marketing",
+    AcquisitionChannel.AFFILIATE: "Affiliate",
+}
+
+
+@st.cache_resource
+def get_ml_inference_engine() -> RiskModelInference | None:
+    """Carrega o modelo ML uma única vez por sessão."""
+    try:
+        return RiskModelInference()
+    except Exception as e:  # noqa: BLE001
+        st.warning(f"⚠️ Modo ML indisponível ({type(e).__name__}). Usando heurística.")
+        return None
+
+
+def build_ml_scenario(
+    unit_price: float,
+    unit_cost: float,
+    quantity: int,
+    discount_pct: float,
+    shipping_cost: float,
+    delivery_days: int,
+    tax_rate: float,
+    channel: AcquisitionChannel,
+) -> RiskScenarioInput:
+    """Constrói um RiskScenarioInput a partir dos inputs econômicos do simulador.
+
+    As features transacionais ausentes no formulário (idade, histórico, demografia)
+    são fixadas em medianas/modos do conjunto de treino (2021-2024, N=110.518).
+    Em produção real viriam do perfil do cliente. Este é um compromisso para
+    viabilizar o modo ML sem alterar a UX do decisor.
+    """
+    gross_sales = unit_price * quantity
+    tax_amount = (unit_price * (1 - discount_pct) * quantity) * tax_rate
+    product_cost = unit_cost * quantity
+
+    return RiskScenarioInput(
+        # Econômicos (derivados dos inputs do decisor)
+        gross_sales=gross_sales,
+        tax_amount=tax_amount,
+        product_cost=product_cost,
+        shipping_cost=shipping_cost * quantity,
+        quantity=quantity,
+        # Transacionais (medianas/modos do treino)
+        customer_age=46.0,
+        orders_count_prior=2,
+        spend_prior=1953.89,
+        days_since_last_order=113,
+        # Categóricos
+        gender="Male",
+        customer_segment="Consumer",
+        region="South",
+        sales_channel="Mobile App",
+        marketing_channel=CHANNEL_TO_MARKETING[channel],
+        payment_method="Credit Card",
+        shipping_method="Express" if delivery_days <= 3 else "Standard",
+        warehouse="WH-014",
+    )
+
 
 # 1. Configuração da Página
 st.set_page_config(
@@ -236,6 +304,48 @@ scenario_input = SimulationScenarioInput(
 
 result = simulator.simulate_scenario(scenario_input)
 
+# 6.5. Toggle de modo de inferência
+inference_engine = get_ml_inference_engine()
+
+modo = st.radio(
+    "**Modo de estimativa de risco:**",
+    options=["🔵 Principal (ML LightGBM)", "⚪ Comparação (Heurística Calibrada)"],
+    index=0 if inference_engine else 1,
+    horizontal=True,
+    help=(
+        "O modo ML aplica o LightGBM treinado em 2021-2024 com calibração de Elkan "
+        "(τ* = 0.1549). Usa features transacionais do perfil do cliente (idade, "
+        "histórico, demografia) fixadas em medianas do treino. "
+        "O modo Heurístico usa médias históricas e deltas de categoria/canal, "
+        "respondendo apenas aos inputs econômicos do formulário. "
+        "Cenários no limiar podem retornar decisões diferentes entre modos."
+    ),
+)
+
+# 6.6. Override do risco quando o modo ML está ativo
+risk_source = "Heurística"
+if modo.startswith("🔵") and inference_engine is not None:
+    try:
+        ml_input = build_ml_scenario(
+            unit_price=unit_price,
+            unit_cost=unit_cost,
+            quantity=quantity,
+            discount_pct=discount_pct_input / 100.0,
+            shipping_cost=shipping_cost,
+            delivery_days=delivery_days,
+            tax_rate=tax_rate_input / 100.0,
+            channel=channel,
+        )
+        ml_result = inference_engine.predict_risk(ml_input)
+
+        # Substituição cirúrgica — apenas campos de risco
+        result.estimated_return_rate = ml_result["prob_devolucao_calibrada"]
+        result.estimated_cancellation_rate = 0.0  # modelo prevê dev+canç agregado
+        risk_source = "ML"
+    except Exception as e:  # noqa: BLE001
+        st.warning(f"Fallback para heurística: {type(e).__name__}: {e}")
+        risk_source = "Heurística"
+
 # 7. Painel Superior de KPIs Executivos
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
@@ -268,13 +378,18 @@ with kpi3:
 
 with kpi4:
     ret_pct = result.estimated_return_rate * 100.0
-    canc_pct = result.estimated_cancellation_rate * 100.0
     st.metric(
         label="Risco Operacional Estimado",
         value=f"{ret_pct:.1f}% Devolução",
-        delta=f"{canc_pct:.1f}% Cancelamento",
+        delta=(
+            f"{result.estimated_cancellation_rate * 100:.1f}% Cancelamento"
+            if risk_source == "Heurística"
+            else "n/d (risco agregado no ML)"
+        ),
         delta_color="inverse",
     )
+    fonte_label = "ML (τ*=0.1549)" if risk_source == "ML" else "Heurística"
+    st.caption(f"Fonte: **{fonte_label}**")
 
 # 8. Faixa de Alerta Sanitário de Risco
 st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
@@ -319,12 +434,13 @@ scenario_dict = {
     "estimated_return_rate": result.estimated_return_rate,
     "estimated_cancellation_rate": result.estimated_cancellation_rate,
     "risk_alert": result.risk_alert,
+    "risk_source": risk_source,
 }
 
 pdf_bytes: bytes | None = None
 pdf_error: str | None = None
 try:
-    pdf_bytes = generate_executive_pdf_bytes(scenario_dict)
+    pdf_bytes = generate_executive_pdf_bytes(scenario_dict, risk_source=risk_source)
 except ExecutivePdfError as e:
     pdf_error = str(e)
 except Exception as e:

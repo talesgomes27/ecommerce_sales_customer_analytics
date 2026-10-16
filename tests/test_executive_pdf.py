@@ -95,3 +95,18 @@ def test_generate_executive_pdf_error_handling(tmp_path: pathlib.Path):
         generate_executive_pdf(invalid_scenario, out_pdf)
 
     assert "Falha na compilação" in str(exc_info.value)
+
+
+def test_generate_executive_pdf_ml_mode(synthetic_scenario: dict, tmp_path: pathlib.Path):
+    """Verifica a correta compilação e cabeçalho ao selecionar o modo de inferência ML."""
+    scenario = synthetic_scenario.copy()
+    scenario["risk_source"] = "ML"
+    scenario["estimated_return_rate"] = 0.0337
+    scenario["estimated_cancellation_rate"] = 0.0
+
+    out_pdf = tmp_path / "parecer_ml_teste.pdf"
+    res = generate_executive_pdf(scenario, out_pdf, risk_source="ML")
+
+    assert res.exists()
+    assert res.stat().st_size > 1024
+    assert res.read_bytes().startswith(b"%PDF-")
