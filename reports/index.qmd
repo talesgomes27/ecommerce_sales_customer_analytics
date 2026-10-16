@@ -104,35 +104,10 @@ A @tbl-methodology resume os objetivos, as decisões de arquitetura e as entrega
 ### Anatomia do Vazamento de Dados (Data Leakage)
 A investigação identificou três frentes onde modelos ingênuos de machine learning aprenderiam atalhos triviais sem capacidade preditiva real em produção.
 
-O diagrama abaixo delimita a fronteira temporal estrita adotada pelo pipeline:
+O infográfico abaixo (@fig-timeline) delimita a fronteira temporal estrita e o isolamento sistemático de variáveis adotado pelo pipeline para blindar o modelo contra vazamento de dados (*Data Leakage*):
 
-```{mermaid}
-%%| label: fig-timeline
-%%| fig-cap: "Fronteira temporal estrita entre dados disponíveis no carrinho (At-Purchase) e variáveis geradas no ciclo de pós-venda."
-flowchart LR
-    subgraph AT_PURCHASE["1. MOMENTO DA COMPRA (At-Purchase)"]
-        direction TB
-        CUST["Dados do Cliente<br/>(Idade, Gênero, Região)"]
-        CART["Carrinho & Itens<br/>(Quantidade, Valor Bruto, Frete)"]
-        HIST["Histórico Retroativo<br/>(Compras Prévias, Gasto Anterior)"]
-        CHANNEL["Canais & Envio<br/>(Canal de Venda, Armazém, Frete)"]
-    end
+![Fronteira temporal estrita entre dados disponíveis no carrinho (At-Purchase) e variáveis descartadas de pós-venda (Data Leakage)](figures/fig_timeline_leakage.png){#fig-timeline fig-align="center" width="100%"}
 
-    subgraph CHECKOUT["CHECKOUT / INFERÊNCIA"]
-        MODEL["Classificador Preventivo<br/>Score de Risco"]
-    end
-
-    subgraph POST_PURCHASE["2. PÓS-VENDA & EXPEDIÇÃO (Descarte Estrito)"]
-        direction TB
-        LEAK1["Prazo de Entrega<br/>(24.557 nulos em não concluídos)"]
-        LEAK2["Status de Pagamento<br/>('Refunded' = 100% Devolução)"]
-        LEAK3["Avaliação & Sentimento<br/>(customer_rating, review)"]
-        LEAK4["LTV Estático de 5 Anos<br/>(customer_lifetime_value)"]
-    end
-
-    AT_PURCHASE --> CHECKOUT
-    CHECKOUT -.->|Fronteira Temporal| POST_PURCHASE
-```
 
 1. **Vazamento de Alvo por Nulos Condicionais:** As colunas `delivery_days`, `estimated_delivery_days`, `customer_rating`, `review_sentiment` e `customer_review` contêm 24.557 nulos. Esse volume corresponde à soma de pedidos cancelados (8.398), devolvidos (9.462) e pendentes (6.697). Um modelo que consumisse `delivery_days` aprenderia a regra espúria `se delivery_days é nulo, o pedido não foi concluído`.
 2. **Determinismo em Estados de Pagamento:** 100% dos pedidos devolvidos possuem `payment_status == 'Refunded'` e 100% dos cancelados possuem `payment_status == 'Failed'`. Esses registros refletem o desfecho financeiro, inexistente no ato do checkout.

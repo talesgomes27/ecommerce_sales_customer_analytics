@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -38,10 +39,213 @@ plt.rcParams["axes.edgecolor"] = "#333333"
 plt.rcParams["axes.linewidth"] = 0.8
 
 
+def generate_data_leakage_boundary_figure(output_path: Path) -> Path:
+    """Gera o diagrama infográfico de fronteira temporal e prevenção de data leakage."""
+    fig, ax = plt.subplots(figsize=(14.5, 6.5), dpi=300)
+    ax.set_facecolor("#ffffff")
+    fig.patch.set_facecolor("#ffffff")
+
+    ax.set_xlim(0, 14.5)
+    ax.set_ylim(0, 7.2)
+    ax.axis("off")
+
+    # Box 1: At-Purchase (Verde)
+    box1 = patches.FancyBboxPatch(
+        (0.4, 0.5),
+        4.3,
+        6.2,
+        boxstyle="round,pad=0.2",
+        facecolor="#f4fbf7",
+        edgecolor="#27ae60",
+        linewidth=2.0,
+    )
+    ax.add_patch(box1)
+    ax.text(
+        2.55,
+        6.25,
+        "1. MOMENTO DA COMPRA (At-Purchase)\n[Atributos Permitidos para Treino e Inferência]",
+        fontsize=11,
+        fontweight="bold",
+        color="#196f3d",
+        ha="center",
+        va="center",
+    )
+
+    items_green = [
+        ("Dados Cadastrais do Cliente", "customer_age, gender, region, country, customer_segment"),
+        ("Composição do Carrinho de Compras", "quantity, gross_sales, tax_amount, shipping_cost"),
+        (
+            "Histórico Retroativo (Point-in-Time)",
+            "orders_count_prior, spend_prior, days_since_last_order",
+        ),
+        (
+            "Canais de Venda e Logística Inicial",
+            "sales_channel, marketing_channel, warehouse, shipping_method",
+        ),
+    ]
+
+    y_pos = 5.0
+    for title, desc in items_green:
+        rect = patches.FancyBboxPatch(
+            (0.6, y_pos - 0.45),
+            3.9,
+            0.9,
+            boxstyle="round,pad=0.1",
+            facecolor="#ffffff",
+            edgecolor="#a9dfbf",
+            linewidth=1.2,
+        )
+        ax.add_patch(rect)
+        ax.text(
+            0.8,
+            y_pos + 0.12,
+            f"[VÁLIDO] {title}",
+            fontsize=9.2,
+            fontweight="bold",
+            color="#196f3d",
+            va="center",
+        )
+        ax.text(0.8, y_pos - 0.18, desc, fontsize=7.8, color="#333333", va="center")
+        y_pos -= 1.15
+
+    # Seta para o Checkout
+    ax.annotate(
+        "",
+        xy=(5.4, 3.6),
+        xytext=(4.9, 3.6),
+        arrowprops={"arrowstyle": "->", "lw": 2.5, "color": "#2980b9"},
+    )
+
+    # Box 2: Checkout / Inferência (Azul)
+    box2 = patches.FancyBboxPatch(
+        (5.5, 1.8),
+        2.9,
+        3.6,
+        boxstyle="round,pad=0.2",
+        facecolor="#ebf5fb",
+        edgecolor="#2980b9",
+        linewidth=2.0,
+    )
+    ax.add_patch(box2)
+    ax.text(
+        6.95,
+        4.9,
+        "CHECKOUT EM TEMPO REAL\nMOTOR DE INFERÊNCIA",
+        fontsize=10.5,
+        fontweight="bold",
+        color="#1b4f72",
+        ha="center",
+        va="center",
+    )
+    ax.text(
+        6.95,
+        3.4,
+        "Pipeline LightGBM\n\nPredição da Probabilidade:\nP(Y = 1 | At-Purchase)\n\nLimiar de Custo Mínimo:\nτ* = 0,55 (Economia: $92k/ano)\n\nDisparo Preventivo:\nAlerta no CD & Verificação 2D",
+        fontsize=8.5,
+        color="#1a252f",
+        ha="center",
+        va="center",
+    )
+
+    # Linha da Fronteira Temporal (Vermelha)
+    ax.plot([8.8, 8.8], [0.3, 6.9], color="#c0392b", linestyle="--", linewidth=2.5)
+    ax.text(
+        8.8,
+        7.05,
+        "FRONTEIRA TEMPORAL INVIOLÁVEL",
+        fontsize=9.5,
+        fontweight="bold",
+        color="#922b21",
+        ha="center",
+        va="bottom",
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": "#fadbd8",
+            "edgecolor": "#c0392b",
+            "lw": 1.2,
+        },
+    )
+
+    # Box 3: Pós-Venda (Vermelho / Vazamento)
+    box3 = patches.FancyBboxPatch(
+        (9.2, 0.5),
+        4.9,
+        6.2,
+        boxstyle="round,pad=0.2",
+        facecolor="#fdf2f2",
+        edgecolor="#c0392b",
+        linewidth=2.0,
+    )
+    ax.add_patch(box3)
+    ax.text(
+        11.65,
+        6.25,
+        "2. PÓS-VENDA & EXPEDIÇÃO\n[Descarte Estrito: Prevenção contra Data Leakage]",
+        fontsize=11,
+        fontweight="bold",
+        color="#922b21",
+        ha="center",
+        va="center",
+    )
+
+    items_red = [
+        (
+            "Vazamento de Alvo por Nulos Condicionais",
+            "delivery_days, customer_rating, review_sentiment\n(24.557 nulos em 100% dos cancelados e devolvidos)",
+        ),
+        (
+            "Desfecho Financeiro Determinístico",
+            'payment_status == "Refunded" (100% Devolução)\npayment_status == "Failed" (100% Cancelamento)',
+        ),
+        (
+            "Vazamento Look-Ahead (Visão de Futuro)",
+            "customer_lifetime_value estático de 5 anos\n(Calculado após o encerramento de 2025)",
+        ),
+        (
+            "Atalhos Sintéticos do Dataset Original",
+            "discount_amount = 0 e loyalty_points = 0\n(Zerados artificialmente em pedidos abortados)",
+        ),
+    ]
+
+    y_pos = 5.0
+    for title, desc in items_red:
+        rect = patches.FancyBboxPatch(
+            (9.4, y_pos - 0.45),
+            4.5,
+            0.9,
+            boxstyle="round,pad=0.1",
+            facecolor="#ffffff",
+            edgecolor="#f5b7b1",
+            linewidth=1.2,
+        )
+        ax.add_patch(rect)
+        ax.text(
+            9.6,
+            y_pos + 0.14,
+            f"[DESCARTE] {title}",
+            fontsize=9.0,
+            fontweight="bold",
+            color="#922b21",
+            va="center",
+        )
+        ax.text(9.6, y_pos - 0.18, desc, fontsize=7.6, color="#444444", va="center")
+        y_pos -= 1.15
+
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=300)
+    plt.close(fig)
+    return output_path
+
+
 def generate_all_figures(project_root: Path, output_dir: Path) -> dict[str, Path]:
-    """Executa o pipeline e exporta as 5 figuras canônicas em alta resolução (300 DPI)."""
+    """Executa o pipeline e exporta todas as figuras canônicas em alta resolução (300 DPI)."""
     output_dir.mkdir(parents=True, exist_ok=True)
     figures: dict[str, Path] = {}
+
+    print("Gerando FIG-00: Data Leakage Boundary Diagram...")
+    fig_path_0 = output_dir / "fig_timeline_leakage.png"
+    generate_data_leakage_boundary_figure(fig_path_0)
+    figures["fig_00"] = fig_path_0
 
     raw_path = project_root / "ecommerce_sales_customer_analytics_150k.csv"
     cust_path = project_root / "customer_master.csv"
