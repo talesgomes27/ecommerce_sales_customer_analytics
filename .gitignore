@@ -34,6 +34,7 @@ data/raw/
 *.pem
 *.key
 credentials.json
+.streamlit/secrets.toml
 
 
 # Jupyter & Editor files
