@@ -3,6 +3,12 @@ project:
   output-dir: _site
   resources:
     - reports/figures/
+  render:
+    - index.qmd
+    - reports/index.qmd
+    - docs/
+    - CHANGELOG.md
+    - "!task.md"
 
 website:
   title: "E-Commerce Sales & Customer Analytics"
