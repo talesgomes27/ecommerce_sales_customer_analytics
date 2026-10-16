@@ -72,8 +72,8 @@ def test_catalog_and_items_loading(project_root: Path) -> None:
     """Valida o carregamento dos arquivos de catálogo e itens individuais."""
     from src.data.loader import load_order_items, load_product_catalog
 
-    cat_path = project_root / "product_catalog.csv"
-    items_path = project_root / "order_items.csv"
+    cat_path = project_root / "data" / "raw" / "product_catalog.csv"
+    items_path = project_root / "data" / "raw" / "order_items.csv"
 
     df_cat = load_product_catalog(cat_path)
     df_items = load_order_items(items_path)

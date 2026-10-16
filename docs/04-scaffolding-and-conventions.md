@@ -20,11 +20,13 @@ ecommerce_sales_customer_analytics/
 ├── AGENTS.md                                # Diretrizes operacionais e guardrails para agentes
 ├── task.md                                  # Rastreabilidade dos 5 Gates pré-código (planning-with-files)
 ├── about.txt                                # Documentação e metadados de domínio
-├── dataset_statistics.csv                   # Resumo estatístico de baseline
-├── ecommerce_sales_customer_analytics_150k.csv # Base canônica consolidada (138.116 pedidos, 46 variáveis)
-├── order_items.csv                          # Base relacional de itens de pedidos (397.569 registros)
-├── product_catalog.csv                      # Catálogo com 1.175 produtos e 15 categorias
-├── customer_master.csv                      # Cadastro de 25.000 clientes com CAC
+├── data/                                    # Repositório organizado de dados do projeto
+│   └── raw/                                 # Datasets brutos imutáveis
+│       ├── dataset_statistics.csv           # Resumo estatístico de baseline
+│       ├── ecommerce_sales_customer_analytics_150k.csv # Base canônica consolidada (138.116 pedidos, 46 variáveis)
+│       ├── order_items.csv                  # Base relacional de itens de pedidos (397.569 registros)
+│       ├── product_catalog.csv              # Catálogo com 1.175 produtos e 15 categorias
+│       └── customer_master.csv              # Cadastro de 25.000 clientes com CAC
 ├── docs/                                    # Artefatos da pré-código (Memória Persistente)
 │   ├── 00_archetype.md                      # Herança do Arquétipo A (stack python-uv-quarto)
 │   ├── 01-data-discovery-and-contracts.md   # Auditoria das 46 variáveis, álgebra e data contracts

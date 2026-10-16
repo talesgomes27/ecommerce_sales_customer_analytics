@@ -247,8 +247,8 @@ def generate_all_figures(project_root: Path, output_dir: Path) -> dict[str, Path
     generate_data_leakage_boundary_figure(fig_path_0)
     figures["fig_00"] = fig_path_0
 
-    raw_path = project_root / "ecommerce_sales_customer_analytics_150k.csv"
-    cust_path = project_root / "customer_master.csv"
+    raw_path = project_root / "data" / "raw" / "ecommerce_sales_customer_analytics_150k.csv"
+    cust_path = project_root / "data" / "raw" / "customer_master.csv"
 
     print("Carregando bases canônicas...")
     df = load_canonical_data(raw_path)
@@ -576,8 +576,8 @@ def generate_all_figures(project_root: Path, output_dir: Path) -> dict[str, Path
     # FIG-06: Análise de Quadrante e Elasticidade de Categorias
     # -------------------------------------------------------------
     print("Gerando FIG-06: Category Quadrant & Pricing Volume...")
-    cat_path = project_root / "product_catalog.csv"
-    items_path = project_root / "order_items.csv"
+    cat_path = project_root / "data" / "raw" / "product_catalog.csv"
+    items_path = project_root / "data" / "raw" / "order_items.csv"
     catalog = load_product_catalog(cat_path)
     items = load_order_items(items_path)
 
