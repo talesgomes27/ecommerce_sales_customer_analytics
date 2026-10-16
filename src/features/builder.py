@@ -7,13 +7,9 @@ AT_PURCHASE_NUMERIC_COLS = [
     "customer_age",
     "quantity",
     "gross_sales",
-    "discount_amount",
     "tax_amount",
     "shipping_cost",
     "product_cost",
-    "loyalty_points_earned",
-    "loyalty_points_redeemed",
-    "discount_pct",
     "orders_count_prior",
     "spend_prior",
     "days_since_last_order",
@@ -44,6 +40,10 @@ PROHIBITED_LEAKAGE_COLS = [
     "customer_order_count",
     "customer_type",
     "is_repeat_customer",
+    "discount_amount",
+    "discount_pct",
+    "loyalty_points_earned",
+    "loyalty_points_redeemed",
 ]
 
 

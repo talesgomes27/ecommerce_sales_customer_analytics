@@ -5,68 +5,170 @@ author: "Tales Gomes"
 date: 2026-10-16
 format:
   html:
+    theme: cosmo
+    lang: pt-BR
     toc: true
+    toc-depth: 3
+    toc-title: "Nesta Página"
     number-sections: true
+    smooth-scroll: true
+    code-fold: true
+    code-tools: true
+    title-block-banner: true
+    fig-dpi: 300
+    df-print: paged
 ---
 
 ::: {.callout-note}
-Este relatório consolida a investigação empírica sobre o ciclo de vida de e-commerce, estruturada pela metodologia híbrida **CRISP-ML(Q) + Data Storytelling**.
+Este relatório consolida a investigação empírica sobre o ciclo de vida comercial e operacional do e-commerce entre 2021 e 2025. O projeto foi desenvolvido sob a metodologia **CRISP-ML(Q) + Data Storytelling**, integrando engenharia de atributos retroativos (*point-in-time*), partição temporal cega (*Out-of-Time*) e explicabilidade fundamentada em ganho factual.
 :::
 
 ## Contexto de Negócio e Hipóteses
 
-### Panorama Operacional
-Entre 2021 e 2025, a operação transacionou \$177.134.263,74 em faturamento líquido e \$76.146.395,76 em lucro operacional, cobrindo 138.116 pedidos distribuídos entre 24.911 clientes únicos.
+### Panorama Operacional e Desafios Estratégicos
+A operação auditada registrou \$177.134.263,74 em faturamento líquido e \$76.146.395,76 em lucro operacional ao longo de 5 anos civis completos (138.116 transações geradas por 24.911 clientes ativos). O ticket médio consolidado situou-se em \$1.282,50.
+
+Apesar da escala expressiva e de um crescimento volumétrico estável (~27,6 mil pedidos por ano), o comitê executivo identificou fragilidades que corroem o retorno sobre o capital empregado:
+
+1. **Canibalização de Margem por Descontos:** Concessão indiscriminada de abatimentos comerciais que totalizaram \$32.819.346,82 no período, gerando operações deficitárias pontuais.
+2. **Atrito Operacional em Cancelamentos e Devoluções:** Taxas acumuladas de devolução (6,85%) e cancelamento (6,08%) somam 12,93% dos pedidos, drenando capacidade logística e elevando custos de estorno.
+3. **Miopia no Ciclo de Vida do Cliente:** Ausência de segmentação comportamental dinâmica e de governança sobre a relação entre o Custo de Aquisição de Clientes (CAC) e o Valor Vitalício (LTV).
 
 ### Hipóteses Centrais de Investigação
-- **Inflexão de Margem ($H_1$):** Identificação do ponto crítico de desconto $D^*$ acima do qual há destruição líquida de caixa.
-- **Eficiência de Canais ($H_2$):** Avaliação de $\frac{\text{LTV}}{\text{CAC}}$ comparando canais orgânicos versus tráfego pago.
-- **Risco Preventivo At-Purchase ($H_3$):** Antecipação de cancelamentos e devoluções no momento do checkout sem vazamento de dados.
-- **Segmentação Comportamental RFM ($H_4$):** Concentração de faturamento e sensibilidade a preço nos clusters de clientes fiéis.
-- **Penalidade por Atraso Logístico ($H_5$):** Quantificação do impacto de atrasos de entrega na nota média de avaliação do cliente.
+
+Para orientar a exploração e a modelagem, formulamos cinco hipóteses empíricas testáveis:
+
+- **$H_1$ (Inflexão de Margem por Desconto):** Existe um ponto de inflexão crítico $D^*$ a partir do qual o desconto supera a margem bruta de catálogo, resultando em operações no prejuízo ($\text{Profit} < 0$).
+- **$H_2$ (Eficiência de Aquisição LTV / CAC):** Canais orgânicos e diretos entregam uma razão LTV/CAC superior aos canais pagos de mídia programática e redes sociais.
+- **$H_3$ (Risco Preventivo At-Purchase):** É viável antecipar cancelamentos e devoluções no ato da compra utilizando exclusivamente dados do carrinho e histórico retroativo do cliente, superando a taxa base de 12,93% sem utilizar informações de pós-venda.
+- **$H_4$ (Concentração RFM):** A segmentação comportamental por Recência, Frequência e Valor revelará forte concentração de faturamento em um grupo restrito de compradores fiéis.
+- **$H_5$ (Penalidade por Atraso Logístico):** Entregas que extrapolam a estimativa comunicada ao cliente sofrem penalização estatisticamente significante na nota média de avaliação.
+
+---
 
 ## Auditoria de Dados e Contratos
 
-### Consistência Estrutural
-A base canônica possui 138.116 registros sem duplicação de chave primária (`order_id`). A integridade contábil foi confirmada em precisão de máquina:
-$$\text{net\_sales} = \text{gross\_sales} - \text{discount\_amount} + \text{tax\_amount} + \text{shipping\_cost}$$
-$$\text{profit} = \text{net\_sales} - \text{shipping\_cost} - \text{product\_cost}$$
+### Integridade Estrutural e Álgebra Contábil
+A base canônica `ecommerce_sales_customer_analytics_150k.csv` reúne 138.116 registros e 46 variáveis. A auditoria confirmou ausência de linhas duplicadas e unicidade estrita do identificador primário `order_id`.
 
-### Blindagem contra Data Leakage
-Variáveis de pós-venda (`delivery_days`, `customer_rating`, `review_sentiment`, `return_reason`, `payment_status == 'Refunded'/'Failed'`) foram formalmente isoladas das tarefas preditivas prévias ao despacho.
+A verificação contábil validou duas identidades lineares com resíduo nulo em precisão de máquina ($< 10^{-11}$):
+
+$$\text{net\_sales} = \text{gross\_sales} - \text{discount\_amount} + \text{tax\_amount} + \text{shipping\_cost}$$
+
+$$\text{profit} = \text{net\_sales} - \text{shipping\_cost} - \text{product\_cost} = (\text{gross\_sales} - \text{discount\_amount} + \text{tax\_amount}) - \text{product\_cost}$$
+
+Um achado fundamental de governança contábil é que o frete faturado é neutralizado pelo custo logístico, enquanto o tributo (`tax_amount`) permanece na conta de lucro desta modelagem sintética.
+
+### Blindagem contra Vazamento de Dados (Data Leakage)
+A investigação detalhada do schema detectou três formas críticas de contaminação que invalidariam modelos preditivos em ambiente de produção:
+
+1. **Vazamento Direto de Desfecho:** As colunas de pós-venda `delivery_days`, `estimated_delivery_days`, `customer_rating`, `review_sentiment` e `customer_review` contêm exatamente 24.557 nulos. Eles correspondem à soma de todos os pedidos cancelados (8.398), devolvidos (9.462) e pendentes (6.697). Nenhum pedido cancelado ou devolvido possui avaliação ou prazo de entrega. Além disso, 100% dos pedidos devolvidos têm `payment_status == 'Refunded'` e 100% dos cancelados têm `payment_status == 'Failed'`.
+2. **Vazamento Temporal Estático (*Look-Ahead Leakage*):** Variáveis como `customer_lifetime_value`, `customer_order_count` e `customer_type` foram sumarizadas sobre os 5 anos completos. Um pedido efetuado em 2021 já apresentava o LTV consolidado de 2025 gravado em sua linha.
+3. **Artefato de Geração nos Descontos e Pontos:** Na base original, transações canceladas e devolvidas foram registradas com desconto zero e pontos de fidelidade zerados. A inclusão ingênua dessas colunas geraria um classificador "perfeito" (PR-AUC = 1.0) baseado apenas em um atalho sintético da base.
+
+Para assegurar validade empírica, todas essas colunas foram estritamente excluídas da matriz de modelagem preditiva *At-Purchase*.
+
+---
 
 ## Análise Exploratória e Engenharia de Atributos
 
-### Dinâmica de Descontos e Vendas Deficitárias
-A análise de dispersão e densidade de margens investiga o comportamento dos 1.296 pedidos deficitários.
+### Dinâmica de Descontos e Vendas Deficitárias ($H_1$)
+O exame da precificação revelou que descontos agressivos destroem valor econômico:
+- **1.296 pedidos (0,94% do volume total)** operaram no prejuízo, acumulando uma perda direta de **\$201.225,34**.
+- O desconto médio das operações deficitárias foi de **51,70%**, contra **14,77%** nas vendas lucrativas.
+- O limiar crítico observado foi de **$D^* = 35,93\%$**: abaixo dessa faixa percentual de desconto, nenhuma venda operou com margem negativa. A partir de 55% de desconto, a margem líquida média da coorte torna-se negativa (-5,86%).
 
-### Retorno sobre Custo de Aquisição por Canal
-Comparativo da relação LTV/CAC entre os canais de marketing e identificação das fontes mais rentáveis.
+![Dinâmica de Desconto e Distribuição das Vendas Deficitárias](figures/fig_01_pricing_elasticity.png){#fig-pricing fig-align="center" width="100%"}
 
-### Segmentação RFM Pontual
-Agrupamento comportamental de clientes construído estritamente com histórico retroativo, sem contaminação futura.
+### Eficiência de Aquisição: LTV vs. CAC ($H_2$)
+O cruzamento das transações acumuladas por cliente com o custo unitário de aquisição registrado em `customer_master.csv` comprovou a superioridade dos canais orgânicos e diretos frente ao tráfego de leilão pago:
+
+- **Organic Search:** LTV médio de \$2.125,30 para um CAC médio de \$42,12, entregando uma razão **LTV/CAC de 50,5x**.
+- **Google Ads e Direct:** Razões de **44,9x** e **44,3x**, respectivamente.
+- **Canais com Menor Retorno:** YouTube (**32,4x**) e TikTok (**33,7x**), cujos clientes registraram menor frequência de recompra e menor gasto acumulado.
+
+![Retorno sobre Investimento em Aquisição (LTV / CAC) por Canal](figures/fig_02_acquisition_efficiency.png){#fig-mkt fig-align="center" width="85%"}
+
+### Segmentação Comportamental RFM e Concentração de Valor ($H_4$)
+Reconstruímos o histórico de compras de forma pontual para calcular Recência, Frequência e Valor Monetário por cliente, ajustando um algoritmo K-Means ($K = 4$) com log-transformação e padronização:
+
+- **Champions (7.854 clientes):** Recência média de 30 dias, 6,4 pedidos e LTV médio de \$8.146,00.
+- **Loyal Customers (5.459 clientes):** Recência de 261 dias, 7,5 pedidos e LTV médio de \$10.526,81.
+- **At-Risk High-Value (8.670 clientes):** Recência média elevada (415 dias), mas histórico prévio de alto valor (\$5.144,89).
+- **Occasional / Low-Value (2.928 clientes):** Baixa frequência (2,2 pedidos) e receita média de \$1.837,95.
+
+A análise da curva de Pareto confirmou forte concentração: **os 20% principais clientes concentram 43,1% de todo o faturamento da empresa**.
+
+![Segmentação RFM (Projeção PCA) e Curva de Concentração de Pareto](figures/fig_03_rfm_segmentation.png){#fig-rfm fig-align="center" width="100%"}
+
+---
 
 ## Modelagem Estatística e Machine Learning
 
-### Formulação do Problema Supervisionado
-Classificação binária de pedidos desfavoráveis no checkout utilizando apenas atributos disponíveis *At-Purchase*.
+### Formulação do Problema Preventivo At-Purchase
+Definimos o alvo supervisionado binário $y \in \{0, 1\}$ como a ocorrência de pedido desfavorável (`Returned` ou `Cancelled`), presente em 12,93% das transações. O classificador opera exclusivamente com dados disponíveis antes da expedição:
+- **Atributos Cadastrais e Carrinho:** Idade, gênero, segmento do cliente, canal de venda, canal de marketing, método de pagamento, método de frete, armazém expedidor.
+- **Valores Financeiros Básicos:** Quantidade de itens, receita bruta (`gross_sales`), custo de produto (`product_cost`), imposto (`tax_amount`) e tarifa de frete (`shipping_cost`).
+- **Histórico Retroativo Pontual:** Pedidos anteriores concluídos (`orders_count_prior`), receita acumulada prévia (`spend_prior`) e dias desde a última compra (`days_since_last_order`).
 
-### Modelos Candidatos e Validação Temporal
-Validação *Out-of-Time* (Treino 2021–2024 / Teste 2025) comparando Baseline balanceado, LightGBM e XGBoost.
+### Esquema de Partição Temporal Out-of-Time
+Adotamos uma partição cronológica estrita:
+- **Conjunto de Treinamento e Ajuste (2021 a 2024):** 110.518 transações (80,0%).
+- **Conjunto de Teste Cego (2025):** 27.598 transações (20,0%), preservadas sem qualquer contato com a etapa de treinamento.
+
+---
 
 ## Avaliação, Diagnóstico e Explicabilidade
 
-### Desempenho sob Forte Desbalanceamento
-Curvas Precision-Recall (PR-AUC) e calibração de corte probabilístico $\tau^*$ fundamentado em custos operacionais.
+### Desempenho Preditivo no Teste Cego (2025)
+Sob desbalanceamento de classes (taxa base de 12,93%), a métrica mandatória de avaliação é a **PR-AUC (Precision-Recall Area Under Curve)**:
 
-### Importância de Fatores por Ganho Real
-Importância de atributos avaliada estritamente por ganho (`gain`), destacando os reais motores de risco no carrinho.
+| Modelo | PR-AUC (Teste 2025) | ROC-AUC (Teste 2025) | Lift sobre a Taxa Base | F1 Ótimo Calibrado |
+| :--- | :---: | :---: | :---: | :---: |
+| **Taxa Base Ingênua** | 0,129 | 0,500 | 1,00x | - |
+| **Baseline (Regressão Logística)** | 0,188 | 0,616 | 1,46x | 0,274 |
+| **LightGBM Classifier (At-Purchase Puro)** | **0,578** | **0,885** | **4,47x** | **0,541** |
+
+O LightGBM superou expressivamente o baseline, entregando um salto de **4,47 vezes sobre a taxa base** sem utilizar nenhuma variável de pós-venda nem atalhos espúrios. A calibração de corte baseada na matriz de custo operacional estabeleceu o limiar ótimo de decisão em $\tau^* = 0,35$.
+
+### Fatores Determinantes de Risco (Importância por Ganho Factual)
+A extração de importância por ganho real de redução de erro (`gain`) revelou que os maiores motores preditivos de cancelamento e devolução residem no valor financeiro e na escala do carrinho:
+1. `tax_amount` e `gross_sales`: Transações de valor muito elevado apresentam propensão desproporcional a estorno ou cancelamento por checagem de crédito.
+2. `quantity`: Carrinhos volumosos possuem maior incidência de avarias e problemas de divergência de itens.
+3. `product_cost`: Margens unitárias e linhas de maior custo têm taxas de devolução mais sensíveis.
+4. `region_North`: Discrepâncias regionais de infraestrutura logística impactam o desfecho.
+
+![Curvas Precision-Recall no Teste 2025 e Top Preditores por Ganho](figures/fig_04_at_purchase_evaluation.png){#fig-eval fig-align="center" width="100%"}
+
+### Teste de Hipótese Logística: Penalidade por Atraso ($H_5$)
+Avaliamos os 113.559 pedidos concluídos para testar se o atraso operacional penaliza a satisfação do consumidor:
+- **Entregas no Prazo (96.673 pedidos):** Avaliação média de **3,76 estrelas**.
+- **Entregas Atrasadas (16.886 pedidos):** Avaliação média de **3,22 estrelas**.
+- **Penalidade Observada:** Queda média de **-0,53 estrelas** ($p < 0,0001$ no teste de Mann-Whitney U e no teste t de Welch).
+- **Tamanho de Efeito:** $d = 1,19$ (efeito grande na escala de Cohen), confirmando categoricamente a hipótese $H_5$.
+
+![Impacto do Atraso Logístico na Avaliação Média do Cliente](figures/fig_05_delivery_delay_impact.png){#fig-delay fig-align="center" width="70%"}
+
+---
 
 ## Recomendações Executivas e Plano de Ação
 
 ::: {.callout-tip}
-### Diretrizes Estratégicas para a Liderança
-1. **Governança de Pricing:** Instituir teto de desconto rígido baseado em $D^*$ por categoria para zerar operações deficitárias.
-2. **Otimização de Mídia:** Realocar verba de canais pagos saturados para canais com maior razão LTV/CAC.
-3. **Mitigação no Checkout:** Intervenção automatizada em carrinhos com alto risco de devolução.
+### Plano de Ação para a Liderança Operacional e Comercial
+
+1. **Governança Estrita de Pricing (Teto em $D^* = 35\%$):**
+   - Estabelecer trava sistêmica na plataforma de e-commerce bloqueando cupons e descontos promocionais que ultrapassem **35% do valor bruto**.
+   - Descontos entre 35% e 50% devem exigir aprovação manual da gerência comercial, eliminando imediatamente os \$201.225,34 de perdas acumuladas em vendas deficitárias.
+
+2. **Realocação Estratégica do Orçamento de Mídia:**
+   - Reduzir em 25% o investimento em canais de menor eficiência unitária (YouTube e TikTok, com LTV/CAC próximo a 32x–33x).
+   - Reinvestir o orçamento liberado no fortalecimento de SEO e campanhas de intenção direta no Google Ads (LTV/CAC de 45x a 50x).
+
+3. **Intervenção Preventiva no Checkout (*At-Purchase Risk Scoring*):**
+   - Integrar o classificador LightGBM ao fluxo de fechamento de carrinho com limiar de decisão $\tau^* = 0,35$.
+   - Para carrinhos com score de risco desfavorável, acionar rotinas automatizadas de mitigação: dupla confirmação de dados cadastrais, validação proativa de endereço e confirmação ativa de guia de tamanhos para vestuário e calçados.
+
+4. **Programa de Retenção para Clientes "At-Risk High-Value":**
+   - A segmentação identificou 8.670 clientes com histórico prévio de alto valor monetário (LTV médio > \$5.100), mas inativos há mais de 400 dias.
+   - Criar régua de CRM personalizada com comunicações segmentadas e ofertas de reengajamento para estancar a evasão dessa coorte.
 :::

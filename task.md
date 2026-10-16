@@ -2,7 +2,7 @@
 
 **Arquétipo:** A (Data Science, Analytics & ML — CRISP-ML(Q) + Data Storytelling)  
 **Stack Primária:** Python 3.12+ (`uv`) + Quarto CLI (`.qmd`) + Ruff + Pytest  
-**Status Atual:** Fase Pré-Código 100% Concluída; Execução Iniciada no Gate 1 da `execution-pipeline`.
+**Status Atual:** Pré-Código e Execução Técnica 100% Concluídos. Relatório e Site Compilados com Sucesso.
 
 ---
 
@@ -45,27 +45,29 @@
 
 ---
 
-## 2. Fase de Execução Técnica (`execution-pipeline`) — [EM ANDAMENTO]
+## 2. Fase de Execução Técnica (`execution-pipeline`) — [CONCLUÍDA]
 
 - [x] **Gate 1: Núcleo de Lógica e Contratos (src/ + tests/)**
   - [x] T1.1: Suíte de testes TDD de contratos contábeis e schema (`tests/test_contracts.py`) [Red]
-  - [x] T1.2: Implementação de validação de schemas Pandera/Polars (`src/data/contracts.py`)
+  - [x] T1.2: Implementação de validação de schemas Pandera (`src/data/contracts.py`)
   - [x] T1.3: Implementação do loader canônico e tipagem determinística (`src/data/loader.py`)
   - [x] T1.4: Execução e passagem verde dos testes (`uv run pytest tests/test_contracts.py`) [Green]
   - [x] Checkpoint: Validação formal do Gate 1 da execução técnica
-- [/] **Gate 2: Integração e Modelagem (CRISP-ML(Q) Stages 3, 4, 5)**
-  - [ ] Features cumulativas point-in-time e blindagem contra leakage (`src/features/builder.py`)
-  - [ ] RFM dinâmico (`src/features/rfm.py`) e clustering K-Means (`src/models/clustering.py`)
-  - [ ] Otimização de margem e limite ótimo de desconto $D^*$ (`src/models/pricing.py`)
-  - [ ] Classificador preventivo At-Purchase via LightGBM/XGBoost (`src/models/train.py`)
-  - [ ] Avaliação cega Out-of-Time em 2025 e PR-AUC (`src/evaluation/metrics.py`)
-  - [ ] Checkpoint: Aprovação dos pipelines de transformação e modelos
-- [ ] **Gate 3: Dataviz de Publicação (reports/figures/)**
-  - [ ] Exportação das 5 figuras canônicas a 300 DPI (`aspect=1`, `sns.despine()`)
-  - [ ] Checkpoint: Aprovação dos gráficos editoriais
-- [ ] **Gate 4: Relatório Executivo Quarto (reports/index.qmd)**
-  - [ ] Redação executiva anti-IA nas 6 seções canônicas com callouts e tabelas
-  - [ ] Checkpoint: Validação textual e narrativa
-- [ ] **Gate 5: Auditoria Quarto e Build de Entrega**
-  - [ ] Execução de `quarto check` e `quarto render` gerando `_site/` completo
-  - [ ] Checkpoint: Aceite final para publicação / deploy
+- [x] **Gate 2: Integração e Modelagem (CRISP-ML(Q) Stages 3, 4, 5)**
+  - [x] Features cumulativas point-in-time e blindagem contra leakage (`src/features/builder.py`)
+  - [x] RFM dinâmico (`src/features/rfm.py`) e clustering K-Means (`src/models/clustering.py`)
+  - [x] Otimização de margem e limite ótimo de desconto $D^*$ (`src/models/pricing.py`)
+  - [x] Classificador preventivo At-Purchase via LightGBM (`src/models/train.py`)
+  - [x] Avaliação cega Out-of-Time em 2025 e PR-AUC (`src/evaluation/metrics.py`)
+  - [x] Checkpoint: Aprovação dos pipelines de transformação e modelos
+- [x] **Gate 3: Dataviz de Publicação (reports/figures/)**
+  - [x] Exportação das 5 figuras canônicas a 300 DPI (`aspect=1`, `sns.despine()`)
+  - [x] Checkpoint: Aprovação dos gráficos editoriais
+- [x] **Gate 4: Relatório Executivo Quarto (reports/index.qmd)**
+  - [x] Redação executiva anti-IA nas 6 seções canônicas com callouts e tabelas
+  - [x] Checkpoint: Validação textual e narrativa
+- [x] **Gate 5: Auditoria Quarto e Build de Entrega**
+  - [x] Execução de `quarto check` e `quarto render` gerando `_site/` completo (11 páginas compiladas)
+  - [x] 15 testes unitários e de contratos aprovados sem falhas (`uv run pytest tests/`)
+  - [x] Análise de linter limpa (`uv run ruff check .`)
+  - [x] Checkpoint: Entrega e publicação validadas com sucesso
