@@ -38,16 +38,14 @@ No entanto, a decomposição das transações revela três pontos cegos que limi
 
 A @tbl-yearly sintetiza a evolução histórica dos principais indicadores executivos:
 
-| Ano | Transações | Faturamento Líquido (USD) | Lucro Operacional (USD) | Ticket Médio (USD) | Margem Média (%) | Taxa de Devolução (%) | Taxa de Cancelamento (%) |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2021** | 27.554 | 35.722.650,67 | 15.325.651,87 | 1.296,46 | 44,95% | 6,62% | 5,85% |
-| **2022** | 27.564 | 35.327.882,62 | 15.167.978,69 | 1.281,67 | 45,01% | 6,62% | 6,14% |
-| **2023** | 27.632 | 35.528.143,74 | 15.247.695,95 | 1.285,76 | 45,01% | 6,83% | 6,17% |
-| **2024** | 27.768 | 35.466.452,28 | 15.292.965,09 | 1.277,24 | 45,20% | 7,03% | 6,35% |
-| **2025** | 27.598 | 35.089.134,43 | 15.112.104,16 | 1.271,44 | 45,16% | 7,15% | 5,89% |
-| **Total** | **138.116** | **177.134.263,74** | **76.146.395,76** | **1.282,50** | **45,07%** | **6,85%** | **6,08%** |
+```{python}
+#| label: tbl-yearly
+#| tbl-cap: "Indicadores operacionais consolidados da operação de e-commerce (2021–2025)."
+#| echo: false
 
-: Indicadores operacionais consolidados da operação de e-commerce (2021–2025). {#tbl-yearly}
+from src.evaluation.tables import table_yearly_summary
+table_yearly_summary()
+```
 
 Observa-se estabilidade volumétrica acompanhada por uma ligeira tendência de elevação nas devoluções, que saltaram de 6,62% em 2021 para 7,15% em 2025.
 
@@ -86,20 +84,14 @@ O projeto seguiu a esteira de desenvolvimento do **Arquétipo A (Data Science, A
 
 A @tbl-methodology resume os objetivos, as decisões de arquitetura e as entregas de cada estágio do pipeline:
 
-| Estágio | Gate / Fase | Foco Técnico e Decisões Adotadas | Artefatos e Entregáveis |
-| :--- | :--- | :--- | :--- |
-| **Pré-Código** | **Gate 1: Data Discovery & Contracts** | Auditoria das 46 colunas, fechamento algébrico de receita e contratos Pandera | `docs/00_archetype.md`, `docs/01-data-discovery-and-contracts.md` |
-| **Pré-Código** | **Gate 2: PRD & Hypotheses** | Formulação das hipóteses H1 a H5, matriz de métricas e split Out-of-Time | `docs/02-PRD-and-specs.md` |
-| **Pré-Código** | **Gate 3: Architecture & Schema** | Definição da topologia em camadas, registro de ADRs (0001 a 0003) e storyboard | `docs/03-architecture-and-schema.md`, `docs/adr/` |
-| **Pré-Código** | **Gate 4: Scaffolding & Tools** | Estruturação de diretórios, `pyproject.toml` (PEP 621), `_quarto.yml` e scripts | `docs/04-scaffolding-and-conventions.md`, `src/` |
-| **Pré-Código** | **Gate 5: Implementation Plan** | Plano de cinco fases com TDD, matriz de rastreabilidade e critérios de aceite | `docs/05-implementation-plan.md` |
-| **Execução** | **Fase 1: Dados & Contratos** | Implementação de `loader.py` e validação de contratos de integridade em lote | `src/data/contracts.py`, `src/data/loader.py`, `tests/test_contracts.py` |
-| **Execução** | **Fase 2: Feature Engineering** | Features retroativas *point-in-time*, cálculo RFM dinâmico e split temporal | `src/features/builder.py`, `src/features/rfm.py`, `tests/test_features.py` |
-| **Execução** | **Fase 3: Modelagem Estatística** | K-Means com K = 4, curva elástica de desconto (D*) e treino LightGBM | `src/models/clustering.py`, `src/models/pricing.py`, `src/models/train.py` |
-| **Execução** | **Fase 4: Avaliação & Diagnóstico** | Teste cego 2025 (PR-AUC = 0,578), ganho factual, Mann-Whitney U e calibração | `src/evaluation/metrics.py`, `tests/test_models.py` |
-| **Execução** | **Fase 5: Visualização & Relatório** | Exportação de 8 figuras canônicas a 300 DPI e compilação do relatório Quarto | `src/evaluation/plots.py`, `reports/index.qmd`, `_site/` |
+```{python}
+#| label: tbl-methodology
+#| tbl-cap: "Síntese da esteira metodológica de engenharia e modelagem (Arquétipo A)."
+#| echo: false
 
-: Síntese da esteira metodológica de engenharia e modelagem (Arquétipo A). {#tbl-methodology}
+from src.evaluation.tables import table_methodology
+table_methodology()
+```
 
 ### Anatomia do Vazamento de Dados (Data Leakage)
 A investigação identificou três frentes onde modelos ingênuos de machine learning aprenderiam atalhos triviais sem capacidade preditiva real em produção.
@@ -127,19 +119,14 @@ Dos 138.116 pedidos, 1.296 (0,94%) foram fechados com margem negativa. A perda a
 
 A análise em faixas percentuais de desconto (@tbl-discount-buckets) demonstra a relação entre o desconto concedido e o risco de prejuízo:
 
-| Faixa de Desconto (%) | Volume de Pedidos | Margem Média (%) | Lucro Mediano (USD) | Pedidos Deficitários | Proporção no Prejuízo (%) |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| **0% a 10%** | 56.764 | 54,2% | 512,30 | 0 | 0,00% |
-| **10% a 20%** | 41.810 | 46,8% | 415,10 | 0 | 0,00% |
-| **20% a 35%** | 28.089 | 38,1% | 310,45 | 0 | 0,00% |
-| **35% a 40%** | 4.783 | 28,6% | 224,18 | 30 | 0,63% |
-| **40% a 45%** | 3.616 | 22,4% | 168,90 | 183 | 5,06% |
-| **45% a 50%** | 2.067 | 16,1% | 115,20 | 307 | 14,85% |
-| **50% a 55%** | 963 | 6,9% | 42,10 | 316 | 32,81% |
-| **55% a 60%** | 687 | -5,9% | -38,50 | 416 | 60,55% |
-| **> 60%** | 79 | -6,1% | -45,12 | 44 | 55,70% |
+```{python}
+#| label: tbl-discount-buckets
+#| tbl-cap: "Análise de rentabilidade e incidência de prejuízo por faixas de desconto."
+#| echo: false
 
-: Análise de rentabilidade e incidência de prejuízo por faixas de desconto. {#tbl-discount-buckets}
+from src.evaluation.tables import table_discount_buckets
+table_discount_buckets()
+```
 
 O comportamento dos dados valida a hipótese $H_1$:
 - O desconto médio das operações com prejuízo foi de **51,70%**, em comparação a **14,77%** nas vendas lucrativas.
@@ -155,20 +142,14 @@ A comparação do Custo de Aquisição de Clientes (CAC) com a receita líquida 
 
 A @tbl-mkt compara o retorno econômico entre as fontes de atração:
 
-| Canal de Marketing | Clientes Adquiridos | CAC Médio (USD) | LTV Médio (USD) | Razão LTV / CAC | Lucro Médio / CAC |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Organic Search** | 5.004 | 42,12 | 2.125,30 | **50,5x** | 21,7x |
-| **Google Ads** | 3.721 | 42,26 | 1.897,38 | **44,9x** | 19,3x |
-| **Direct** | 3.699 | 42,23 | 1.870,51 | **44,3x** | 19,1x |
-| **Facebook Ads** | 3.003 | 42,04 | 1.755,73 | **41,8x** | 18,0x |
-| **Instagram** | 2.489 | 41,83 | 1.673,43 | **40,0x** | 17,2x |
-| **Email Marketing** | 2.022 | 42,18 | 1.598,36 | **37,9x** | 16,3x |
-| **Referral** | 2.018 | 42,18 | 1.583,37 | **37,5x** | 16,2x |
-| **Affiliate** | 1.235 | 41,91 | 1.475,99 | **35,2x** | 15,1x |
-| **TikTok** | 981 | 42,33 | 1.428,03 | **33,7x** | 14,5x |
-| **YouTube** | 739 | 42,64 | 1.380,61 | **32,4x** | 13,9x |
+```{python}
+#| label: tbl-mkt
+#| tbl-cap: "Métricas de retorno sobre o investimento em aquisição por canal de marketing."
+#| echo: false
 
-: Métricas de retorno sobre o investimento em aquisição por canal de marketing. {#tbl-mkt}
+from src.evaluation.tables import table_marketing_performance
+table_marketing_performance()
+```
 
 Os dados confirmam a hipótese $H_2$:
 - O canal **Organic Search** alcançou a liderança com **50,5x** de retorno LTV/CAC, decorrente de uma maior frequência de compra por cliente ao longo dos anos.
@@ -184,14 +165,14 @@ Aplicamos o modelo de agrupamento K-Means sobre três dimensões comportamentais
 
 A @tbl-rfm apresenta o perfil médio dos centroides encontrados:
 
-| Segmento | Clientes | Proporção (%) | Recência Média (dias) | Frequência Média | Valor Gasto Médio (USD) | Ticket Médio (USD) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Champions** | 7.854 | 31,5% | 29,8 | 6,4 | 8.146,00 | 1.272,81 |
-| **Loyal Customers** | 5.459 | 21,9% | 261,3 | 7,5 | 10.526,81 | 1.403,57 |
-| **At-Risk High-Value** | 8.670 | 34,8% | 415,2 | 4,3 | 5.144,89 | 1.196,48 |
-| **Occasional / Low-Value** | 2.928 | 11,8% | 606,2 | 2,2 | 1.837,95 | 835,43 |
+```{python}
+#| label: tbl-rfm
+#| tbl-cap: "Perfil comportamental dos quatro clusters gerados via K-Means sobre métricas RFM."
+#| echo: false
 
-: Perfil comportamental dos quatro clusters gerados via K-Means sobre métricas RFM. {#tbl-rfm}
+from src.evaluation.tables import table_rfm_segments
+table_rfm_segments()
+```
 
 Os resultados confirmam a hipótese $H_4$:
 - Os dois grupos de maior valor (**Loyal Customers** e **Champions**) reúnem 53,4% da base de clientes e concentram mais de 65% de todo o volume transacionado.
@@ -205,25 +186,14 @@ A @fig-rfm ilustra a separação dos clusters no espaço das duas primeiras comp
 ### Desempenho por Categoria de Produto
 A abertura das linhas de catálogo em 15 categorias revela um descompasso estrutural entre volume faturado e margem percentual retida. A @tbl-categories consolida as métricas comerciais agregadas:
 
-| Categoria | Faturamento (USD) | Lucro Operacional (USD) | Margem Líquida (%) | Preço Médio (USD) | Volume de Itens |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Electronics** | 41.148.162,90 | 14.103.982,74 | **34,28%** | 797,79 | 55.784 |
-| **Jewelry** | 25.561.333,78 | 10.391.635,32 | 40,65% | 567,23 | 48.859 |
-| **Home Appliances** | 24.842.478,64 | 10.288.878,45 | 41,42% | 479,34 | 56.281 |
-| **Automotive** | 16.449.898,28 | 6.477.194,28 | 39,38% | 303,68 | 58.046 |
-| **Sports & Outdoors** | 15.726.848,17 | 7.230.037,31 | 45,97% | 260,96 | 64.752 |
-| **Home & Kitchen** | 10.971.629,82 | 5.203.824,25 | 47,43% | 236,72 | 49.682 |
-| **Baby & Kids** | 9.690.605,60 | 4.818.148,07 | 49,72% | 192,40 | 53.945 |
-| **Health & Wellness** | 9.228.068,04 | 4.263.304,41 | 46,20% | 158,19 | 62.054 |
-| **Office Supplies** | 8.884.212,85 | 4.585.377,04 | 51,61% | 164,30 | 57.631 |
-| **Fashion** | 7.434.589,51 | 3.669.631,60 | 49,36% | 162,35 | 48.774 |
-| **Pet Supplies** | 6.421.229,71 | 3.263.681,62 | 50,83% | 128,27 | 53.093 |
-| **Toys & Games** | 5.472.675,99 | 2.800.442,39 | 51,17% | 102,68 | 55.788 |
-| **Beauty & Personal Care** | 4.735.647,66 | 2.477.469,89 | 52,32% | 82,38 | 59.765 |
-| **Grocery** | 2.990.696,44 | 1.648.934,90 | **55,14%** | 54,14 | 55.607 |
-| **Books & Media** | 2.840.799,90 | 1.475.496,28 | 51,94% | 45,38 | 62.305 |
+```{python}
+#| label: tbl-categories
+#| tbl-cap: "Desempenho comercial e financeiro por categoria de produto."
+#| echo: false
 
-: Desempenho comercial e financeiro por categoria de produto. {#tbl-categories}
+from src.evaluation.tables import table_category_performance
+table_category_performance()
+```
 
 A análise matricial de quadrantes (@fig-cat-quadrant) divide o portfólio em quatro zonas estratégicas com base nas médias globais (faturamento médio de \$11,8M por categoria e margem de contribuição ponderada de 43,0%):
 
@@ -267,13 +237,14 @@ Comparamos dois estimadores:
 ### Desempenho Preditivo no Teste Cego ($H_3$)
 A @tbl-eval resume o desempenho dos modelos no conjunto de teste cego de 2025:
 
-| Modelo | PR-AUC | ROC-AUC | Brier Score | Limiar Ótimo (tau*) | F1 Ótimo | Precisão no Corte | Recall no Corte |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Taxa Base Ingênua** | 0,129 | 0,500 | 0,113 | - | - | 0,129 | 1,000 |
-| **Baseline Logit** | 0,188 | 0,616 | 0,229 | 0,52 | 0,274 | 0,221 | 0,361 |
-| **LightGBM At-Purchase** | **0,578** | **0,885** | **0,089** | **0,35** | **0,541** | **0,488** | **0,607** |
+```{python}
+#| label: tbl-eval
+#| tbl-cap: "Avaliação comparativa de modelos no conjunto de teste cego de 2025."
+#| echo: false
 
-: Avaliação comparativa de modelos no conjunto de teste cego de 2025. {#tbl-eval}
+from src.evaluation.tables import table_model_evaluation
+table_model_evaluation()
+```
 
 Os resultados confirmam a hipótese $H_3$:
 - O classificador **LightGBM At-Purchase** alcançou **PR-AUC de 0,578**, o que representa um **lift de 4,47 vezes sobre a taxa base** (0,129).
@@ -309,19 +280,14 @@ A política de corte não deve adotar o limiar arbitrário de 0,50 sem respaldo 
 
 A @tbl-threshold-costs simula os impactos operacionais e financeiros para diferentes valores de limiar no conjunto de teste cego de 2025 (3.598 eventos desfavoráveis em 27.598 pedidos):
 
-| Limiar (tau) | Falsos Negativos (FN) | Falsos Positivos (FP) | Custo FN (USD) | Custo FP (USD) | Custo Total (USD) | Economia Líquida (USD) | Perfil da Decisão |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **0,10** | 0 | 23.159 | 0,00 | 185.272,00 | 185.272,00 | -23.362,00 | Conservadorismo extremo (intervenção em massa) |
-| **0,25** | 33 | 19.536 | 1.485,00 | 156.288,00 | 157.773,00 | 4.137,00 | Alta cobertura com sobrecarga operacional |
-| **0,35** | 77 | 15.646 | 3.465,00 | 125.168,00 | 128.633,00 | 33.277,00 | Maximização do F1-Score (Recall 60,7%) |
-| **0,45** | 197 | 10.702 | 8.865,00 | 85.616,00 | 94.481,00 | 67.429,00 | Zona de transição equilibrada |
-| **0,50** | 383 | 7.620 | 17.235,00 | 60.960,00 | 78.195,00 | 83.715,00 | Ponto de corte balanceado padrão |
-| **0,55** | **891** | **3.665** | **40.095,00** | **29.320,00** | **69.415,00** | **92.495,00** | **Mínimo Global de Custo Financeiro (tau*)** |
-| **0,60** | 1.631 | 1.279 | 73.395,00 | 10.232,00 | 83.627,00 | 78.283,00 | Alta precisão com perda de cobertura |
-| **0,70** | 3.299 | 82 | 148.455,00 | 656,00 | 149.111,00 | 12.799,00 | Intervenção mínima |
-| **0,90** | 3.598 | 0 | 161.910,00 | 0,00 | 161.910,00 | 0,00 | Política passiva / Inação (Sem modelo) |
+```{python}
+#| label: tbl-threshold-costs
+#| tbl-cap: "Simulação de trade-offs operacionais e custo total em função do limiar de decisão no teste 2025."
+#| echo: false
 
-: Simulação de trade-offs operacionais e custo total em função do limiar de decisão no teste 2025. {#tbl-threshold-costs}
+from src.evaluation.tables import table_threshold_costs
+table_threshold_costs()
+```
 
 A simulação comprova que o **ponto de mínimo custo financeiro situa-se em $\tau^* = 0,55$**, gerando um custo operacional de **\$69.415,00** e uma **economia líquida de \$92.495,00** frente à política passiva de não intervir (\$161.910,00). Caso o objetivo da operação seja maximizar a retenção bruta e capturar mais de 60% dos desfechos negativos mesmo com custo de checagem mais elevado, o limiar de transição $\tau = 0,35$ é o recomendado.
 
@@ -356,19 +322,14 @@ A decomposição dos motivos revela que **62,1% das devoluções (5.878 pedidos)
 
 A @tbl-returns-action detalha o dimensionamento de impacto e o plano de mitigação para cada causa de devolução:
 
-| Causa Raiz de Devolução | Volume | Proporção (%) | Custo Reverso Acumulado (USD) | Categoria Predominante | Ação Mitigadora no Fulfillment e Catálogo |
-| :--- | :---: | :---: | :---: | :--- | :--- |
-| **Wrong Product** | 1.237 | 13,07% | 55.665,00 | Electronics, Fashion | Leitura de código de barras 2D obrigatória antes do empacotamento |
-| **Other** | 1.208 | 12,77% | 54.360,00 | Variadas | Refinamento dos formulários de SAC para redução de respostas genéricas |
-| **Changed Mind** | 1.204 | 12,72% | 54.180,00 | Jewelry, Toys | Oferta de crédito em loja com bônus de 5% em vez de estorno imediato |
-| **Size Issue** | 1.182 | 12,49% | 53.190,00 | Fashion, Sports | Tabela interativa de medidas e provador virtual com inteligência 3D |
-| **Defective Product** | 1.174 | 12,41% | 52.830,00 | Electronics, Appliances | Bloqueio temporário de SKUs e auditoria de lotes de fornecedores críticos |
-| **Late Delivery** | 1.172 | 12,39% | 52.740,00 | Automotive, Kids | Ajuste dinâmico de SLA por região e redistribuição para armazéns locais |
-| **Product Not as Expected** | 1.147 | 12,12% | 51.615,00 | Home, Beauty | Atualização de fotos reais, vídeos de uso e fichas técnicas completas |
-| **Damaged Product** | 1.138 | 12,03% | 51.210,00 | Grocery, Books | Revisão dos padrões de embalagem protetora e plástico-bolha no armazém |
-| **Total** | **9.462** | **100,00%** | **425.790,00** | - | - |
+```{python}
+#| label: tbl-returns-action
+#| tbl-cap: "Diagnóstico das causas de devolução, custo de logística reversa e plano de contenção operacional."
+#| echo: false
 
-: Diagnóstico das causas de devolução, custo de logística reversa e plano de contenção operacional. {#tbl-returns-action}
+from src.evaluation.tables import table_returns_root_cause
+table_returns_root_cause()
+```
 
 No Painel (b) da @fig-returns-pay, as taxas de devolução (entre 6,49% e 7,08%) e cancelamento (entre 5,96% e 6,39%) mantêm distribuição uniforme entre as sete modalidades de pagamento. Esse achado demonstra que a inadimplência ou a desistência não é induzida pela forma de quitação (ex.: boleto ou dinheiro na entrega), mas pelo atendimento da expectativa de prazo e qualidade do produto entregue.
 
@@ -406,12 +367,12 @@ Com base nos diagnósticos consolidados, propomos quatro intervenções priorit�
 
 A @tbl-roadmap estabelece a sequência de execução das recomendações ao longo dos próximos trimestres:
 
-| Fase | Prazo | Iniciativa Principal | Responsável | Métrica de Sucesso (OKR) |
-| :--- | :---: | :--- | :--- | :--- |
-| **Q1** | Mês 1–3 | Implementação da trava sistêmica de desconto em 35% no e-commerce | Pricing & TI | Zerar operações com margem negativa (Lucro < 0) |
-| **Q2** | Mês 4–6 | Integração do modelo LightGBM At-Purchase (tau* = 0,55) ao checkout | Data Science & Engenharia | Reduzir a taxa de devolução de 7,15% para abaixo de 6,00% |
-| **Q3** | Mês 7–9 | Bipagem 2D no armazém e atualização de guias de medidas no catálogo | Operações & Logística | Reduzir em 40% devoluções por produto errado e tamanho |
-| **Q4** | Mês 10–12 | Realocação de mídia para canais > 44x e régua de CRM para clientes em risco | Growth & CRM | Aumentar LTV/CAC ponderado em 15% e reativar 350 clientes |
+```{python}
+#| label: tbl-roadmap
+#| tbl-cap: "Cronograma tático de execução das recomendações de inteligência de e-commerce."
+#| echo: false
 
-: Cronograma tático de execução das recomendações de inteligência de e-commerce. {#tbl-roadmap}
+from src.evaluation.tables import table_roadmap
+table_roadmap()
+```
 

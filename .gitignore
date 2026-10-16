@@ -16,8 +16,10 @@ htmlcov/
 # Quarto build outputs and cache
 /.quarto/
 _site/
+.quarto_data/
 
 # Binary data, models, and databases
+data/raw/
 *.parquet
 *.feather
 *.pkl

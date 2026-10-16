@@ -36,6 +36,9 @@ format:
     css: styles.css
     include-after-body: toggle-toc.html
 
+jupyter:
+  kernel: python3
+
 execute:
   freeze: auto
   echo: false

@@ -14,4 +14,9 @@ def project_root() -> Path:
 @pytest.fixture(scope="session")
 def raw_data_path(project_root: Path) -> Path:
     """Retorna o caminho do arquivo consolidado de transações."""
-    return project_root / "data" / "raw" / "ecommerce_sales_customer_analytics_150k.csv"
+    path = project_root / "data" / "raw" / "ecommerce_sales_customer_analytics_150k.csv"
+    if not path.exists():
+        pytest.skip(
+            "Base de dados bruta ausente no ambiente (excluída do versionamento remoto por governança)."
+        )
+    return path

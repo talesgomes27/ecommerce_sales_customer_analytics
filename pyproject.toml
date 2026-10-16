@@ -24,6 +24,7 @@ dependencies = [
     "seaborn>=0.13.0",
     "pandera[polars]>=0.20.0",
     "ipykernel>=6.29.0",
+    "great-tables>=1.1.0",
 ]
 
 [project.optional-dependencies]

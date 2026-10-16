@@ -75,6 +75,13 @@ def test_catalog_and_items_loading(project_root: Path) -> None:
     cat_path = project_root / "data" / "raw" / "product_catalog.csv"
     items_path = project_root / "data" / "raw" / "order_items.csv"
 
+    if not cat_path.exists() or not items_path.exists():
+        import pytest
+
+        pytest.skip(
+            "Arquivos de catálogo e itens ausentes no ambiente (excluídos do repositório remoto)."
+        )
+
     df_cat = load_product_catalog(cat_path)
     df_items = load_order_items(items_path)
 
