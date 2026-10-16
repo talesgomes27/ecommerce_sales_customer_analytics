@@ -99,7 +99,7 @@ table.table td {
   transform: translateY(-1px);
 }
 
-/* Estado de sumário recolhido */
+/* Estado de sumário recolhido: centralização simétrica e expansão bilateral */
 body.toc-collapsed #quarto-margin-sidebar {
   display: none !important;
 }
@@ -108,8 +108,21 @@ body.toc-collapsed #toc-restore-btn {
   display: block !important;
 }
 
-body.toc-collapsed #quarto-document-content {
-  grid-column: page-start / margin-end !important;
-  max-width: 100% !important;
-  transition: all 0.25s ease-in-out;
+@media (min-width: 992px) {
+  body.toc-collapsed .page-columns {
+    display: grid !important;
+    gap: 0 !important;
+    grid-template-columns:
+      [screen-start] 1.5em
+      [screen-start-inset page-start page-start-inset body-start-outset body-start] 1fr
+      [body-content-start] minmax(min(100%, 750px), 1350px) [body-content-end]
+      1fr [body-end body-end-outset page-end-inset page-end screen-end-inset]
+      1.5em [screen-end] !important;
+  }
+
+  body.toc-collapsed #quarto-document-content {
+    grid-column: body-content-start / body-content-end !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
 }
