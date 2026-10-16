@@ -1,0 +1,40 @@
+project:
+  type: website
+  output-dir: _site
+  resources:
+    - reports/figures/
+
+website:
+  title: "E-Commerce Sales & Customer Analytics"
+  description: "Diagnóstico Analítico, Otimização de Margem e Predição Preventiva At-Purchase"
+  site-url: "https://tales.github.io/ecommerce_sales_customer_analytics"
+  navbar:
+    left:
+      - href: reports/index.qmd
+        text: "Relatório Executivo"
+      - href: docs/01-data-discovery-and-contracts.md
+        text: "Contratos de Dados"
+      - href: docs/02-PRD-and-specs.md
+        text: "Especificação & PRD"
+      - href: docs/03-architecture-and-schema.md
+        text: "Arquitetura"
+
+format:
+  html:
+    theme: cosmo
+    lang: pt-BR
+    toc: true
+    toc-depth: 3
+    toc-title: "Nesta Página"
+    number-sections: true
+    smooth-scroll: true
+    code-fold: true
+    code-tools: true
+    title-block-banner: true
+    fig-dpi: 300
+    df-print: paged
+
+execute:
+  freeze: auto
+  echo: false
+  warning: false

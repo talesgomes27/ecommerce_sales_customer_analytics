@@ -1,0 +1,72 @@
+---
+title: "Inteligência Comercial, Precificação e Gestão de Risco Operacional em E-Commerce"
+subtitle: "Estudo analítico e preditivo sobre 138.116 transações comerciais (2021–2025)"
+author: "Tales Gomes"
+date: 2026-10-16
+format:
+  html:
+    toc: true
+    number-sections: true
+---
+
+::: {.callout-note}
+Este relatório consolida a investigação empírica sobre o ciclo de vida de e-commerce, estruturada pela metodologia híbrida **CRISP-ML(Q) + Data Storytelling**.
+:::
+
+## Contexto de Negócio e Hipóteses
+
+### Panorama Operacional
+Entre 2021 e 2025, a operação transacionou \$177.134.263,74 em faturamento líquido e \$76.146.395,76 em lucro operacional, cobrindo 138.116 pedidos distribuídos entre 24.911 clientes únicos.
+
+### Hipóteses Centrais de Investigação
+- **Inflexão de Margem ($H_1$):** Identificação do ponto crítico de desconto $D^*$ acima do qual há destruição líquida de caixa.
+- **Eficiência de Canais ($H_2$):** Avaliação de $\frac{\text{LTV}}{\text{CAC}}$ comparando canais orgânicos versus tráfego pago.
+- **Risco Preventivo At-Purchase ($H_3$):** Antecipação de cancelamentos e devoluções no momento do checkout sem vazamento de dados.
+- **Segmentação Comportamental RFM ($H_4$):** Concentração de faturamento e sensibilidade a preço nos clusters de clientes fiéis.
+- **Penalidade por Atraso Logístico ($H_5$):** Quantificação do impacto de atrasos de entrega na nota média de avaliação do cliente.
+
+## Auditoria de Dados e Contratos
+
+### Consistência Estrutural
+A base canônica possui 138.116 registros sem duplicação de chave primária (`order_id`). A integridade contábil foi confirmada em precisão de máquina:
+$$\text{net\_sales} = \text{gross\_sales} - \text{discount\_amount} + \text{tax\_amount} + \text{shipping\_cost}$$
+$$\text{profit} = \text{net\_sales} - \text{shipping\_cost} - \text{product\_cost}$$
+
+### Blindagem contra Data Leakage
+Variáveis de pós-venda (`delivery_days`, `customer_rating`, `review_sentiment`, `return_reason`, `payment_status == 'Refunded'/'Failed'`) foram formalmente isoladas das tarefas preditivas prévias ao despacho.
+
+## Análise Exploratória e Engenharia de Atributos
+
+### Dinâmica de Descontos e Vendas Deficitárias
+A análise de dispersão e densidade de margens investiga o comportamento dos 1.296 pedidos deficitários.
+
+### Retorno sobre Custo de Aquisição por Canal
+Comparativo da relação LTV/CAC entre os canais de marketing e identificação das fontes mais rentáveis.
+
+### Segmentação RFM Pontual
+Agrupamento comportamental de clientes construído estritamente com histórico retroativo, sem contaminação futura.
+
+## Modelagem Estatística e Machine Learning
+
+### Formulação do Problema Supervisionado
+Classificação binária de pedidos desfavoráveis no checkout utilizando apenas atributos disponíveis *At-Purchase*.
+
+### Modelos Candidatos e Validação Temporal
+Validação *Out-of-Time* (Treino 2021–2024 / Teste 2025) comparando Baseline balanceado, LightGBM e XGBoost.
+
+## Avaliação, Diagnóstico e Explicabilidade
+
+### Desempenho sob Forte Desbalanceamento
+Curvas Precision-Recall (PR-AUC) e calibração de corte probabilístico $\tau^*$ fundamentado em custos operacionais.
+
+### Importância de Fatores por Ganho Real
+Importância de atributos avaliada estritamente por ganho (`gain`), destacando os reais motores de risco no carrinho.
+
+## Recomendações Executivas e Plano de Ação
+
+::: {.callout-tip}
+### Diretrizes Estratégicas para a Liderança
+1. **Governança de Pricing:** Instituir teto de desconto rígido baseado em $D^*$ por categoria para zerar operações deficitárias.
+2. **Otimização de Mídia:** Realocar verba de canais pagos saturados para canais com maior razão LTV/CAC.
+3. **Mitigação no Checkout:** Intervenção automatizada em carrinhos com alto risco de devolução.
+:::
