@@ -2,6 +2,7 @@
 
 [![CI Pipeline](https://github.com/talesgomes27/ecommerce_sales_customer_analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/talesgomes27/ecommerce_sales_customer_analytics/actions/workflows/ci.yml)
 [![Quarto Publish](https://github.com/talesgomes27/ecommerce_sales_customer_analytics/actions/workflows/publish.yml/badge.svg)](https://github.com/talesgomes27/ecommerce_sales_customer_analytics/actions/workflows/publish.yml)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-sales-customer-analytics.streamlit.app/)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Package Manager: uv](https://img.shields.io/badge/uv-fast-blueviolet.svg)](https://github.com/astral-sh/uv)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -9,8 +10,7 @@
 
 Plataforma de inteligência de vendas, diagnóstico de margem de contribuição e simulação de cenários operacionais para comércio eletrônico. Integra auditoria rigorosa de contratos de dados, modelagem de propensão com calibração orientada a custo financeiro e um motor de simulação de decisões desacoplado da interface gráfica.
 
-<!-- TODO: atualizar URL do Streamlit quando publicado em nuvem -->
-[📊 Relatório Executivo Interativo (Quarto)](https://talesgomes27.github.io/ecommerce_sales_customer_analytics/) &nbsp;|&nbsp; [🎛️ Simulador What-If (Streamlit)](app.py)
+[📊 Relatório Executivo Interativo (Quarto)](https://talesgomes27.github.io/ecommerce_sales_customer_analytics/) &nbsp;|&nbsp; [🎛️ Simulador What-If (Streamlit Cloud)](https://ecommerce-sales-customer-analytics.streamlit.app/)
 
 ---
 
@@ -144,7 +144,10 @@ uv run just setup
 ```
 
 ### 3. Executando o Simulador What-If (Dashboard Interativo)
-Inicie a aplicação analítica local:
+O simulador interativo está publicado e disponível publicamente em:
+👉 **[ecommerce-sales-customer-analytics.streamlit.app](https://ecommerce-sales-customer-analytics.streamlit.app/)**
+
+Para executar a aplicação localmente:
 ```bash
 uv run streamlit run app.py
 ```
