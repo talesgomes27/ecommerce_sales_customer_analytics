@@ -81,6 +81,26 @@ $$\text{profit} = \text{net\_sales} - \text{shipping\_cost} - \text{product\_cos
 
 Essa formulação revela uma particularidade do modelo de dados: a receita de frete é compensada pelo custo logístico, mas o valor de impostos (`tax_amount`) permanece na conta de lucro operacional da transação.
 
+### Jornada Metodológica dos Gates Adotados
+O projeto seguiu a esteira de desenvolvimento do **Arquétipo A (Data Science, Analytics & Machine Learning)**, estruturada em duas macrofases sequenciais: o planejamento pré-código em cinco gates de governança e a execução técnica modular orientada a testes unitários (TDD).
+
+A @tbl-methodology resume os objetivos, as decisões de arquitetura e as entregas de cada estágio do pipeline:
+
+| Estágio | Gate / Fase | Foco Técnico e Decisões Adotadas | Artefatos e Entregáveis |
+| :--- | :--- | :--- | :--- |
+| **Pré-Código** | **Gate 1: Data Discovery & Contracts** | Auditoria das 46 colunas, fechamento algébrico de receita e contratos Pandera | `docs/00_archetype.md`, `docs/01-data-discovery-and-contracts.md` |
+| **Pré-Código** | **Gate 2: PRD & Hypotheses** | Formulação das hipóteses $H_1$ a $H_5$, matriz de métricas e split Out-of-Time | `docs/02-PRD-and-specs.md` |
+| **Pré-Código** | **Gate 3: Architecture & Schema** | Definição da topologia em camadas, registro de ADRs (0001 a 0003) e storyboard | `docs/03-architecture-and-schema.md`, `docs/adr/` |
+| **Pré-Código** | **Gate 4: Scaffolding & Tools** | Estruturação de diretórios, `pyproject.toml` (PEP 621), `_quarto.yml` e scripts | `docs/04-scaffolding-and-conventions.md`, `src/` |
+| **Pré-Código** | **Gate 5: Implementation Plan** | Plano de cinco fases com TDD, matriz de rastreabilidade e critérios de aceite | `docs/05-implementation-plan.md` |
+| **Execução** | **Fase 1: Dados & Contratos** | Implementação de `loader.py` e validação de contratos de integridade em lote | `src/data/contracts.py`, `src/data/loader.py`, `tests/test_contracts.py` |
+| **Execução** | **Fase 2: Feature Engineering** | Features retroativas *point-in-time*, cálculo RFM dinâmico e split temporal | `src/features/builder.py`, `src/features/rfm.py`, `tests/test_features.py` |
+| **Execução** | **Fase 3: Modelagem Estatística** | K-Means com $K=4$, curva elástica de desconto ($D^*$) e treino LightGBM | `src/models/clustering.py`, `src/models/pricing.py`, `src/models/train.py` |
+| **Execução** | **Fase 4: Avaliação & Diagnóstico** | Teste cego 2025 (PR-AUC = 0,578), ganho factual, Mann-Whitney U e calibração | `src/evaluation/metrics.py`, `tests/test_models.py` |
+| **Execução** | **Fase 5: Visualização & Relatório** | Exportação de 8 figuras canônicas a 300 DPI e compilação do relatório Quarto | `src/evaluation/plots.py`, `reports/index.qmd`, `_site/` |
+
+: Síntese da esteira metodológica de engenharia e modelagem (Arquétipo A). {#tbl-methodology}
+
 ### Anatomia do Vazamento de Dados (Data Leakage)
 A investigação identificou três frentes onde modelos ingênuos de machine learning aprenderiam atalhos triviais sem capacidade preditiva real em produção.
 
@@ -230,7 +250,16 @@ A abertura das linhas de catálogo em 15 categorias revela um descompasso estrut
 
 : Desempenho comercial e financeiro por categoria de produto. {#tbl-categories}
 
-A categoria **Electronics** lidera amplamente o faturamento (\$41,1M, representando 23% da receita líquida global), mas entrega a menor margem de contribuição (34,28%). Em contrapartida, categorias com ticket menor como **Grocery** e **Beauty & Personal Care** entregam margens superiores a 52%, indicando oportunidades para estratégias de *cross-selling* que elevem a rentabilidade do carrinho.
+A análise matricial de quadrantes (@fig-cat-quadrant) divide o portfólio em quatro zonas estratégicas com base nas médias globais (faturamento médio de \$11,8M por categoria e margem de contribuição ponderada de 43,0%):
+
+1. **Volume com Margem Comprimida (Quadrante Inferior Direito):** A categoria **Electronics** concentra \$41,15M em faturamento (23,2% do total), mas opera com a menor margem da empresa (34,28%). O preço médio unitário é o mais alto do catálogo (\$797,79). Qualquer desconto superior a 30% nessa linha destrói margem bruta com velocidade acelerada.
+2. **Motores de Rentabilidade e Volume (Quadrante Superior Direito):** **Jewelry** (\$25,56M; margem 40,65%) e **Home Appliances** (\$24,84M; margem 41,42%) combinam ticket elevado com margens saudáveis, sustentando mais de \$20,6M em lucro operacional acumulado.
+3. **Rentabilizadores de Alta Margem (Quadrante Superior Esquerdo):** Linhas como **Grocery** (55,14%), **Beauty & Personal Care** (52,32%), **Books & Media** (51,94%) e **Office Supplies** (51,61%) possuem faturamento individual modesto, mas operam com margens superiores a 51%. São os candidatos naturais para pacotes de *cross-selling* no checkout para elevar a margem de cestas que contenham itens de tecnologia.
+4. **Linhas Especializadas de Giro Equilibrado (Quadrante Central):** **Sports & Outdoors** (\$15,73M; margem 45,97%), **Automotive** (\$16,45M; margem 39,38%) e **Home & Kitchen** (\$10,97M; margem 47,43%) sustentam o miolo do faturamento com previsibilidade operacional.
+
+![Matriz de Quadrante Comercial (Faturamento vs. Margem Líquida) e Relação Preço Unitário vs. Volume Vendido](figures/fig_06_category_quadrant_analysis.png){#fig-cat-quadrant fig-align="center" width="100%"}
+
+O Painel (b) da @fig-cat-quadrant ilustra a dinâmica de volume versus preço unitário: categorias de consumo frequente e baixo ticket (como Books e Grocery, com preços médios abaixo de \$55) alcançam volumes próximos a 60 mil itens vendidos, com volatilidade de margem mínima. Já as categorias de bens duráveis operam no extremo oposto, exigindo controle mais rigoroso nas políticas de frete e prazos de devolução.
 
 ---
 
@@ -289,6 +318,38 @@ A @fig-eval exibe a curva Precision-Recall comparativa (Painel a) e o gráfico d
 
 ![Curvas Precision-Recall no Teste 2025 e Top Preditores por Ganho Real](figures/fig_04_at_purchase_evaluation.png){#fig-eval fig-align="center" width="100%"}
 
+### Calibração de Probabilidades e Otimização da Matriz de Custo
+
+Modelos de machine learning em ambientes de checkout corporativo exigem calibração de probabilidade rigorosa. Se a inferência prediz $P(Y=1) = 0,70$, espera-se que 70 em cada 100 transações dessa faixa resultem de fato em atrito pós-venda.
+
+Avaliamos a confiabilidade probabilística do modelo por meio do **Brier Score** e da curva de confiabilidade (*Reliability Curve*). O LightGBM alcançou um Brier Score de **0,0893**, superando a regressão logística (0,2291) e a probabilidade marginal histórica (0,1125).
+
+A @fig-model-calib apresenta a aderência probabilística no Painel (a) e a curva de custo operacional total em função do limiar de decisão $\tau$ no Painel (b):
+
+![Curva de Calibração (Reliability Curve) e Curva de Custo Operacional Total por Limiar de Decisão](figures/fig_08_model_calibration_and_cost_curve.png){#fig-model-calib fig-align="center" width="100%"}
+
+A política de corte não deve adotar o limiar arbitrário de 0,50 sem respaldo financeiro. Modelamos a função de perda econômica real ponderando as assimetrias do negócio:
+- **Custo do Falso Negativo ($C_{FN} = \$45,00$):** Pedido de risco não identificado que avança para expedição, acarretando frete reverso, estorno bancário e desvalorização do item devolvido.
+- **Custo do Falso Positivo ($C_{FP} = \$8,00$):** Alerta preventivo gerado para um pedido legítimo, acionando verificação cadastral via WhatsApp/SMS ou dupla checagem de separação no armazém.
+
+A @tbl-threshold-costs simula os impactos operacionais e financeiros para diferentes valores de limiar no conjunto de teste cego de 2025 (3.598 eventos desfavoráveis em 27.598 pedidos):
+
+| Limiar ($\tau$) | Falsos Negativos (FN) | Falsos Positivos (FP) | Custo FN ($) | Custo FP ($) | Custo Operacional Total ($) | Economia vs. Inação ($) | Perfil da Decisão |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **0,10** | 0 | 23.159 | 0,00 | 185.272,00 | 185.272,00 | -\$23.362,00 | Conservadorismo extremo (intervenção em massa) |
+| **0,25** | 33 | 19.536 | 1.485,00 | 156.288,00 | 157.773,00 | \$4.137,00 | Alta cobertura com sobrecarga operacional |
+| **0,35** | 77 | 15.646 | 3.465,00 | 125.168,00 | 128.633,00 | \$33.277,00 | Maximização do F1-Score (Recall 60,7%) |
+| **0,45** | 197 | 10.702 | 8.865,00 | 85.616,00 | 94.481,00 | \$67.429,00 | Zona de transição equilibrada |
+| **0,50** | 383 | 7.620 | 17.235,00 | 60.960,00 | 78.195,00 | \$83.715,00 | Ponto de corte balanceado padrão |
+| **0,55** | **891** | **3.665** | **40.095,00** | **29.320,00** | **69.415,00** | **\$92.495,00** | **Mínimo Global de Custo Financeiro ($\tau^*$)** |
+| **0,60** | 1.631 | 1.279 | 73.395,00 | 10.232,00 | 83.627,00 | \$78.283,00 | Alta precisão com perda de cobertura |
+| **0,70** | 3.299 | 82 | 148.455,00 | 656,00 | 149.111,00 | \$12.799,00 | Intervenção mínima |
+| **0,90** | 3.598 | 0 | 161.910,00 | 0,00 | 161.910,00 | \$0,00 | Política passiva / Inação (Sem modelo) |
+
+: Simulação de trade-offs operacionais e custo total em função do limiar de decisão no teste 2025. {#tbl-threshold-costs}
+
+A simulação comprova que o **ponto de mínimo custo financeiro situa-se em $\tau^* = 0,55$**, gerando um custo operacional de **\$69.415,00** e uma **economia líquida de \$92.495,00** frente à política passiva de não intervir (\$161.910,00). Caso o objetivo da operação seja maximizar a retenção bruta e capturar mais de 60% dos desfechos negativos mesmo com custo de checagem mais elevado, o limiar de transição $\tau = 0,35$ é o recomendado.
+
 ### Teste de Hipótese Logística: Penalidade por Atraso ($H_5$)
 Avaliamos os 113.559 pedidos concluídos com registro de prazo estimado e real de entrega para verificar se atrasos reduzem a satisfação comunicada pelo consumidor:
 
@@ -303,6 +364,38 @@ O resultado confirma plenamente a hipótese $H_5$. Atrasos na entrega exercem im
 A @fig-delay apresenta a distribuição comparativa das notas via boxplot:
 
 ![Impacto do Atraso Logístico na Avaliação Média do Cliente](figures/fig_05_delivery_delay_impact.png){#fig-delay fig-align="center" width="70%"}
+
+### Diagnóstico Operacional: Causas de Devolução e Meios de Pagamento
+
+O atrito pós-venda não se distribui ao acaso. Aprofundamos o diagnóstico sobre as 9.462 ocorrências de devolução registradas na operação para distinguir arrependimentos genuínos de falhas logísticas e cadastrais evitáveis.
+
+A @fig-returns-pay ilustra a decomposição dos motivos de devolução no Painel (a) e o comportamento das taxas de falha operacional (devoluções e cancelamentos) por meio de pagamento no Painel (b):
+
+![Decomposição dos Motivos de Devolução e Taxas de Falha Operacional por Meio de Pagamento](figures/fig_07_operational_diagnostics_returns_payments.png){#fig-returns-pay fig-align="center" width="100%"}
+
+A decomposição dos motivos revela que **62,1% das devoluções (5.878 pedidos) decorrem de falhas operacionais evitáveis**:
+1. **Erros de Separação e Picking (Wrong Product e Damaged Product):** 2.375 pedidos (25,1% das devoluções) foram expedidos com produto incorreto ou avariado durante o manuseio.
+2. **Defasagem de Informação no Catálogo (Size Issue e Product Not as Expected):** 2.329 pedidos (24,6%) resultaram de incompatibilidade de tamanho ou fotos e descrições técnicas desalinhadas da realidade física.
+3. **Controle de Qualidade de Fornecedores (Defective Product):** 1.174 pedidos (12,4%) apresentaram defeitos de fabricação na entrega.
+4. **Desistência Subjetiva (Changed Mind e Other):** 2.412 pedidos (25,5%) decorrem de decisão unilateral do comprador, inerente ao comércio eletrônico.
+
+A @tbl-returns-action detalha o dimensionamento de impacto e o plano de mitigação para cada causa de devolução:
+
+| Causa Raiz de Devolução | Volume | Proporção (%) | Custo Reverso Acumulado ($) | Categoria Predominante | Ação Mitigadora no Fulfillment e Catálogo |
+| :--- | :---: | :---: | :---: | :--- | :--- |
+| **Wrong Product** | 1.237 | 13,07% | \$55.665,00 | Electronics, Fashion | Leitura de código de barras 2D obrigatória antes do empacotamento |
+| **Other** | 1.208 | 12,77% | \$54.360,00 | Variadas | Refinamento dos formulários de SAC para redução de respostas genéricas |
+| **Changed Mind** | 1.204 | 12,72% | \$54.180,00 | Jewelry, Toys | Oferta de crédito em loja com bônus de 5% em vez de estorno imediato |
+| **Size Issue** | 1.182 | 12,49% | \$53.190,00 | Fashion, Sports | Tabela interativa de medidas e provador virtual com inteligência 3D |
+| **Defective Product** | 1.174 | 12,41% | \$52.830,00 | Electronics, Appliances | Bloqueio temporário de SKUs e auditoria de lotes de fornecedores críticos |
+| **Late Delivery** | 1.172 | 12,39% | \$52.740,00 | Automotive, Kids | Ajuste dinâmico de SLA por região e redistribuição para armazéns locais |
+| **Product Not as Expected** | 1.147 | 12,12% | \$51.615,00 | Home, Beauty | Atualização de fotos reais, vídeos de uso e fichas técnicas completas |
+| **Damaged Product** | 1.138 | 12,03% | \$51.210,00 | Grocery, Books | Revisão dos padrões de embalagem protetora e plástico-bolha no armazém |
+| **Total** | **9.462** | **100,00%** | **\$425.790,00** | - | - |
+
+: Diagnóstico das causas de devolução, custo de logística reversa e plano de contenção operacional. {#tbl-returns-action}
+
+No Painel (b) da @fig-returns-pay, as taxas de devolução (entre 6,49% e 7,08%) e cancelamento (entre 5,96% e 6,39%) mantêm distribuição uniforme entre as sete modalidades de pagamento. Esse achado demonstra que a inadimplência ou a desistência não é induzida pela forma de quitação (ex.: boleto ou dinheiro na entrega), mas pelo atendimento da expectativa de prazo e qualidade do produto entregue.
 
 ---
 
@@ -321,11 +414,15 @@ Com base nos diagnósticos consolidados, propomos quatro intervenções priorit�
    - *Ação:* Reduzir em 30% a alocação de verba em canais de menor retorno relativo (YouTube com LTV/CAC de 32,4x e TikTok com 33,7x). Redirecionar os recursos para iniciativas de SEO (Organic Search, com 50,5x) e busca direta (Google Ads, com 44,9x).
    - *Impacto Financeiro:* Ganho estimado de **\$180.000,00/ano** em margem bruta adicional pelo aumento da proporção de clientes de alta recorrência.
 
-3. **Automação Preventiva de Risco no Checkout (Scoring com $\tau^* = 0,35$):**
-   - *Ação:* Integrar o modelo LightGBM At-Purchase ao fluxo de finalização do carrinho. Pedidos classificados com probabilidade de risco desfavorável $> 0,35$ acionam rotinas preventivas: dupla verificação de endereço e checagem de tamanho para vestuário e calçados.
-   - *Impacto Financeiro:* Redução estimada de 15% nas devoluções evitáveis, poupando aproximadamente **\$85.000,00/ano** em custos logísticos reversos e reprocessamento.
+3. **Automação Preventiva de Risco no Checkout (Scoring com $\tau^* = 0,55$):**
+   - *Ação:* Integrar o modelo LightGBM At-Purchase ao fluxo de checkout via microsserviço de inferência. Pedidos com probabilidade calculada superior a $\tau^* = 0,55$ (limiar de custo mínimo) ativam dupla verificação de separação no centro de distribuição e checagem instantânea de endereço. Para categorias de vestuário e calçados, disparar prompt preventivo de confirmação de medidas.
+   - *Impacto Financeiro:* **Economia líquida de \$92.495,00/ano** na operação, reduzindo o custo de desfechos negativos de \$161.910,00 para \$69.415,00.
 
-4. **Régua de Reengajamento para a Coorte "At-Risk High-Value":**
+4. **Saneamento Operacional de Armazém e Catálogo (Contenção de Devoluções):**
+   - *Ação:* Implementar leitura ótica bidimensional (bipagem 2D) obrigatória na expedição para neutralizar os 1.237 envios de produto errado (Wrong Product), atualizar o guia interativo de tamanhos (Size Issue) e auditar fornecedores de eletrônicos com taxas anômalas de avaria.
+   - *Impacto Financeiro:* Redução de até 30% nas devoluções evitáveis, poupando **\$79.500,00/ano** em fretes reversos e avarias físicas.
+
+5. **Régua de Reengajamento para a Coorte "At-Risk High-Value":**
    - *Ação:* Ativar campanhas personalizadas para os 8.670 clientes de alto valor histórico (gasto médio > \$5.100) que não compram há mais de 400 dias.
    - *Impacto Financeiro:* Reativação de 4% dessa base (cerca de 347 clientes) representa um potencial de **\$445.000,00 em faturamento incremental**.
 :::
@@ -337,8 +434,9 @@ A @tbl-roadmap estabelece a sequência de execução das recomendações ao long
 | Fase | Prazo | Iniciativa Principal | Responsável | Métrica de Sucesso (OKR) |
 | :--- | :---: | :--- | :--- | :--- |
 | **Q1** | Mês 1–3 | Implementação da trava sistêmica de desconto em 35% no e-commerce | Pricing & TI | Zerar operações com margem negativa ($\text{Profit} < 0$) |
-| **Q2** | Mês 4–6 | Integração do modelo LightGBM At-Purchase à API de checkout | Data Science & Engenharia | Reduzir a taxa de devolução de 7,15% para $< 6,20\%$ |
-| **Q3** | Mês 7–9 | Realocação do orçamento de mídia para canais com LTV/CAC $> 44x$ | Growth & Marketing | Aumentar a razão LTV/CAC média ponderada em 15% |
-| **Q4** | Mês 10–12 | Lançamento da régua de CRM para os 8.670 clientes de alto valor inativos | CRM & Vendas | Reativar no mínimo 350 clientes da coorte em risco |
+| **Q2** | Mês 4–6 | Integração do modelo LightGBM At-Purchase ($\tau^* = 0,55$) ao checkout | Data Science & Engenharia | Reduzir a taxa de devolução de 7,15% para $< 6,00\%$ |
+| **Q3** | Mês 7–9 | Bipagem 2D no armazém e atualização de guias de medidas no catálogo | Operações & Logística | Reduzir em 40% devoluções por produto errado e tamanho |
+| **Q4** | Mês 10–12 | Realocação de mídia para canais $> 44x$ e régua de CRM para clientes em risco | Growth & CRM | Aumentar LTV/CAC ponderado em 15% e reativar 350 clientes |
 
 : Cronograma tático de execução das recomendações de inteligência de e-commerce. {#tbl-roadmap}
+

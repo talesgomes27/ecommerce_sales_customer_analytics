@@ -68,6 +68,14 @@
   - [x] Checkpoint: Validação textual e narrativa
 - [x] **Gate 5: Auditoria Quarto e Build de Entrega**
   - [x] Execução de `quarto check` e `quarto render` gerando `_site/` completo (11 páginas compiladas)
-  - [x] 15 testes unitários e de contratos aprovados sem falhas (`uv run pytest tests/`)
-  - [x] Análise de linter limpa (`uv run ruff check .`)
+  - [x] 16 testes unitários e de contratos aprovados sem falhas (`uv run pytest tests/`)
+  - [x] Análise de linter limpa (`uv run ruff check .` e `uv run ruff format --check .`)
+  - [x] **Enriquecimento Editorial Pré-Release (Storytelling End-to-End):**
+    - [x] `fig_06_category_quadrant_analysis.png`: Matriz de Quadrante Receita vs Margem e Preço Unitário vs Volume
+    - [x] `fig_07_operational_diagnostics_returns_payments.png`: Decomposição dos 8 motivos de devolução e taxas por meio de pagamento
+    - [x] `fig_08_model_calibration_and_cost_curve.png`: Curva de calibração (Brier = 0,0893) e curva de custo total por limiar $\tau$
+    - [x] Tabela metodológica dos gates da esteira analítica (`@tbl-methodology`)
+    - [x] Tabela de simulação de custos operacionais por limiar de decisão (`@tbl-threshold-costs`)
+    - [x] Tabela diagnóstica e plano de contenção de devoluções no fulfillment (`@tbl-returns-action`)
   - [x] Checkpoint: Entrega e publicação validadas com sucesso
+

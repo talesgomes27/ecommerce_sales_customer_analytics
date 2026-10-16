@@ -66,3 +66,19 @@ def test_schema_contracts_validation(raw_data_path: Path) -> None:
     df = load_canonical_data(raw_data_path)
     validated_df = validate_transactions_schema(df)
     assert validated_df is not None
+
+
+def test_catalog_and_items_loading(project_root: Path) -> None:
+    """Valida o carregamento dos arquivos de catálogo e itens individuais."""
+    from src.data.loader import load_order_items, load_product_catalog
+
+    cat_path = project_root / "product_catalog.csv"
+    items_path = project_root / "order_items.csv"
+
+    df_cat = load_product_catalog(cat_path)
+    df_items = load_order_items(items_path)
+
+    assert len(df_cat) > 0, "Catálogo de produtos vazio."
+    assert "product_category" in df_cat.columns, "Coluna product_category ausente no catálogo."
+    assert len(df_items) > 0, "Tabela order_items vazia."
+    assert "unit_price" in df_items.columns, "Coluna unit_price ausente em order_items."

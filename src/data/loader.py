@@ -53,3 +53,19 @@ def load_product_catalog(file_path: str | Path) -> pd.DataFrame:
         raise FileNotFoundError(f"Arquivo não encontrado: {path}")
 
     return pd.read_csv(path)
+
+
+def load_order_items(file_path: str | Path) -> pd.DataFrame:
+    """Carrega os itens individuais dos pedidos com quantidades e preços.
+
+    Args:
+        file_path: Caminho para o arquivo order_items.csv.
+
+    Returns:
+        pd.DataFrame: Detalhamento de itens por pedido.
+    """
+    path = Path(file_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Arquivo não encontrado: {path}")
+
+    return pd.read_csv(path)

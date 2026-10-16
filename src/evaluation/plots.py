@@ -5,10 +5,17 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from sklearn.calibration import calibration_curve
 from sklearn.decomposition import PCA
+from sklearn.metrics import brier_score_loss
 from sklearn.preprocessing import StandardScaler
 
-from src.data.loader import load_canonical_data, load_customer_master
+from src.data.loader import (
+    load_canonical_data,
+    load_customer_master,
+    load_order_items,
+    load_product_catalog,
+)
 from src.evaluation.metrics import (
     analyze_marketing_acquisition_efficiency,
     compute_delivery_delay_hypothesis,
@@ -324,6 +331,8 @@ def generate_all_figures(project_root: Path, output_dir: Path) -> dict[str, Path
         data=completed,
         x="Status da Entrega",
         y="customer_rating",
+        hue="Status da Entrega",
+        legend=False,
         palette=["#2ecc71", "#e74c3c"],
         width=0.45,
         ax=ax,
@@ -359,7 +368,305 @@ def generate_all_figures(project_root: Path, output_dir: Path) -> dict[str, Path
     plt.close(fig)
     figures["fig_05"] = fig_path_5
 
-    print("Todas as 5 figuras geradas com sucesso!")
+    # -------------------------------------------------------------
+    # FIG-06: Análise de Quadrante e Elasticidade de Categorias
+    # -------------------------------------------------------------
+    print("Gerando FIG-06: Category Quadrant & Pricing Volume...")
+    cat_path = project_root / "product_catalog.csv"
+    items_path = project_root / "order_items.csv"
+    catalog = load_product_catalog(cat_path)
+    items = load_order_items(items_path)
+
+    merged_cat = items.merge(
+        catalog[["product_id", "product_category"]],
+        on="product_id",
+        how="left",
+    )
+    cat_summary = (
+        merged_cat.groupby("product_category")
+        .agg(
+            net_sales=("net_sales", "sum"),
+            profit=("profit", "sum"),
+            quantity=("quantity", "sum"),
+            avg_price=("unit_price", "mean"),
+        )
+        .reset_index()
+    )
+    cat_summary["margin_pct"] = (cat_summary["profit"] / cat_summary["net_sales"]) * 100
+    cat_summary["sales_millions"] = cat_summary["net_sales"] / 1e6
+    cat_summary["quantity_k"] = cat_summary["quantity"] / 1000
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.2), constrained_layout=True)
+    for ax in axes:
+        ax.set_box_aspect(1)
+        sns.despine(ax=ax)
+
+    # Painel (a): Matriz de Quadrante Faturamento vs Margem Líquida
+    mean_sales = cat_summary["sales_millions"].mean()
+    mean_margin = (cat_summary["profit"].sum() / cat_summary["net_sales"].sum()) * 100
+
+    axes[0].scatter(
+        cat_summary["sales_millions"],
+        cat_summary["margin_pct"],
+        s=cat_summary["quantity_k"] * 12,
+        color="#2980b9",
+        alpha=0.6,
+        edgecolor="#1b4f72",
+        linewidth=1.2,
+    )
+    axes[0].axvline(mean_sales, color="#7f8c8d", linestyle="--", linewidth=1.2, alpha=0.7)
+    axes[0].axhline(mean_margin, color="#7f8c8d", linestyle="--", linewidth=1.2, alpha=0.7)
+
+    for _, row in cat_summary.iterrows():
+        offset_y = 0.7 if row["margin_pct"] >= mean_margin else -1.2
+        offset_x = 0.5 if row["sales_millions"] < 30 else -3.5
+        axes[0].text(
+            row["sales_millions"] + offset_x,
+            row["margin_pct"] + offset_y,
+            row["product_category"],
+            fontsize=8,
+            fontweight="semibold",
+            color="#2c3e50",
+            ha="center",
+        )
+
+    axes[0].set_title(
+        "(a) Quadrante Receita ($M) vs. Margem Líquida (%)",
+        fontsize=11,
+        fontweight="bold",
+        pad=10,
+    )
+    axes[0].set_xlabel("Receita Líquida Total (Milhões US$)", fontsize=10)
+    axes[0].set_ylabel("Margem de Lucro Real (%)", fontsize=10)
+    axes[0].set_ylim(30, 58)
+    axes[0].set_xlim(0, 46)
+    axes[0].grid(True, alpha=0.25, linestyle="--")
+
+    # Painel (b): Preço Médio Unitário vs Volume Total Vendido
+    axes[1].scatter(
+        cat_summary["avg_price"],
+        cat_summary["quantity_k"],
+        s=120,
+        color="#27ae60",
+        alpha=0.7,
+        edgecolor="#1e8449",
+        linewidth=1.2,
+    )
+
+    for _, row in cat_summary.iterrows():
+        axes[1].text(
+            row["avg_price"] + 15,
+            row["quantity_k"],
+            row["product_category"],
+            fontsize=8,
+            fontweight="semibold",
+            color="#2c3e50",
+            va="center",
+        )
+
+    axes[1].set_title(
+        "(b) Preço Médio Unitário vs. Volume de Itens (k)",
+        fontsize=11,
+        fontweight="bold",
+        pad=10,
+    )
+    axes[1].set_xlabel("Preço Médio Unitário (US$)", fontsize=10)
+    axes[1].set_ylabel("Volume Vendido (Milhares de Unidades)", fontsize=10)
+    axes[1].set_xlim(0, 920)
+    axes[1].set_ylim(44, 68)
+    axes[1].grid(True, alpha=0.25, linestyle="--")
+
+    fig_path_6 = output_dir / "fig_06_category_quadrant_analysis.png"
+    fig.savefig(fig_path_6, dpi=300)
+    plt.close(fig)
+    figures["fig_06"] = fig_path_6
+
+    # -------------------------------------------------------------
+    # FIG-07: Diagnóstico Operacional: Motivos de Devolução e Meios de Pagamento
+    # -------------------------------------------------------------
+    print("Gerando FIG-07: Operational Diagnostics (Returns & Payment)...")
+    returns_df = df[df["order_status"] == "Returned"]
+    reason_counts = returns_df["return_reason"].value_counts().sort_values(ascending=True)
+    reason_pct = (reason_counts / len(returns_df)) * 100
+
+    pay_status = (
+        df.groupby("payment_method")
+        .agg(
+            total=("order_id", "count"),
+            returned=("order_status", lambda s: (s == "Returned").sum()),
+            cancelled=("order_status", lambda s: (s == "Cancelled").sum()),
+        )
+        .reset_index()
+    )
+    pay_status["return_rate"] = (pay_status["returned"] / pay_status["total"]) * 100
+    pay_status["cancel_rate"] = (pay_status["cancelled"] / pay_status["total"]) * 100
+    pay_status = pay_status.sort_values(by="total", ascending=True)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.2), constrained_layout=True)
+    for ax in axes:
+        ax.set_box_aspect(1)
+        sns.despine(ax=ax)
+
+    # Cores destacando falhas operacionais evitáveis
+    colors_reason = [
+        "#c0392b"
+        if r in ["Wrong Product", "Size Issue", "Defective Product", "Product Not as Expected"]
+        else "#2980b9"
+        for r in reason_counts.index
+    ]
+
+    bars_reason = axes[0].barh(
+        reason_counts.index,
+        reason_counts.values,
+        color=colors_reason,
+        edgecolor="#333333",
+        height=0.6,
+        alpha=0.85,
+    )
+    axes[0].set_title(
+        "(a) Motivos de Devolução (9.462 Ocorrências)", fontsize=11, fontweight="bold", pad=10
+    )
+    axes[0].set_xlabel("Frequência Absoluta de Devoluções", fontsize=10)
+    axes[0].grid(True, axis="x", alpha=0.25, linestyle="--")
+
+    for bar, pct in zip(bars_reason, reason_pct.values, strict=False):
+        w = bar.get_width()
+        axes[0].text(
+            w + 18,
+            bar.get_y() + bar.get_height() / 2,
+            f"{int(w):,} ({pct:.1f}%)",
+            va="center",
+            ha="left",
+            fontsize=8,
+            fontweight="semibold",
+        )
+    axes[0].set_xlim(0, 1500)
+
+    # Painel (b): Taxas de Devolução e Cancelamento por Meio de Pagamento
+    y_pos = np.arange(len(pay_status))
+    height = 0.35
+
+    axes[1].barh(
+        y_pos + height / 2,
+        pay_status["return_rate"],
+        height=height,
+        label="Devoluções (%)",
+        color="#e74c3c",
+        alpha=0.85,
+        edgecolor="#922b21",
+    )
+    axes[1].barh(
+        y_pos - height / 2,
+        pay_status["cancel_rate"],
+        height=height,
+        label="Cancelamentos (%)",
+        color="#f39c12",
+        alpha=0.85,
+        edgecolor="#b9770e",
+    )
+
+    axes[1].set_yticks(y_pos)
+    axes[1].set_yticklabels(pay_status["payment_method"], fontsize=9)
+    axes[1].set_title(
+        "(b) Taxas de Falha por Meio de Pagamento", fontsize=11, fontweight="bold", pad=10
+    )
+    axes[1].set_xlabel("Taxa do Evento sobre o Volume (%)", fontsize=10)
+    axes[1].set_xlim(0, 9.5)
+    axes[1].legend(loc="lower right", frameon=True, fontsize=8)
+    axes[1].grid(True, axis="x", alpha=0.25, linestyle="--")
+
+    fig_path_7 = output_dir / "fig_07_operational_diagnostics_returns_payments.png"
+    fig.savefig(fig_path_7, dpi=300)
+    plt.close(fig)
+    figures["fig_07"] = fig_path_7
+
+    # -------------------------------------------------------------
+    # FIG-08: Calibração de Probabilidades e Curva de Custo Operacional
+    # -------------------------------------------------------------
+    print("Gerando FIG-08: Model Calibration & Cost Trade-off Curve...")
+    y_prob_lgbm = lgbm_pipe.predict_proba(X_test)[:, 1]
+    prob_true, prob_pred = calibration_curve(y_test, y_prob_lgbm, n_bins=10)
+    brier = brier_score_loss(y_test, y_prob_lgbm)
+
+    thresholds_sim = np.linspace(0.10, 0.90, 33)
+    sim_costs = []
+    for t in thresholds_sim:
+        p_t = (y_prob_lgbm >= t).astype(int)
+        fn_count = np.sum((y_test == 1) & (p_t == 0))
+        fp_count = np.sum((y_test == 0) & (p_t == 1))
+        sim_costs.append(fn_count * 45.0 + fp_count * 8.0)
+
+    opt_idx = int(np.argmin(sim_costs))
+    opt_t = thresholds_sim[opt_idx]
+    opt_cost = sim_costs[opt_idx]
+    base_cost = np.sum(y_test == 1) * 45.0
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.2), constrained_layout=True)
+    for ax in axes:
+        ax.set_box_aspect(1)
+        sns.despine(ax=ax)
+
+    # Painel (a): Reliability Curve (Calibração)
+    axes[0].plot(
+        [0, 1], [0, 1], color="#7f8c8d", linestyle="--", linewidth=1.5, label="Calibração Ideal"
+    )
+    axes[0].plot(
+        prob_pred,
+        prob_true,
+        marker="o",
+        color="#2980b9",
+        linewidth=2,
+        markersize=6,
+        label=f"LightGBM (Brier = {brier:.4f})",
+    )
+    axes[0].set_title(
+        "(a) Curva de Calibração (Reliability Curve)", fontsize=11, fontweight="bold", pad=10
+    )
+    axes[0].set_xlabel("Probabilidade Predita P(Y = 1)", fontsize=10)
+    axes[0].set_ylabel("Fração Real de Positivos", fontsize=10)
+    axes[0].set_xlim(-0.02, 1.02)
+    axes[0].set_ylim(-0.02, 1.02)
+    axes[0].legend(loc="upper left", frameon=True, fontsize=8)
+    axes[0].grid(True, alpha=0.25, linestyle="--")
+
+    # Painel (b): Curva de Custo Operacional por Limiar
+    axes[1].plot(
+        thresholds_sim, sim_costs, color="#c0392b", linewidth=2.5, label="Custo Operacional C(τ)"
+    )
+    axes[1].axhline(
+        base_cost,
+        color="#7f8c8d",
+        linestyle=":",
+        linewidth=1.5,
+        label=f"Sem Modelo (FN Total = ${base_cost:,.0f})",
+    )
+    axes[1].scatter(
+        [opt_t], [opt_cost], color="#27ae60", s=130, zorder=5, label=f"Ótimo τ* = {opt_t:.2f}"
+    )
+
+    axes[1].annotate(
+        f"Mínimo Global:\nτ* = {opt_t:.2f}\nCusto: ${opt_cost:,.0f}\nEconomia: ${base_cost - opt_cost:,.0f}",
+        xy=(opt_t, opt_cost),
+        xytext=(opt_t + 0.08, opt_cost + 25000),
+        arrowprops={"arrowstyle": "->", "color": "#27ae60", "lw": 1.5},
+        fontsize=9,
+        bbox={"boxstyle": "round,pad=0.4", "fc": "#eafaf1", "ec": "#27ae60", "lw": 1.2},
+    )
+
+    axes[1].set_title(
+        "(b) Custo Operacional vs. Limiar de Decisão (τ)", fontsize=11, fontweight="bold", pad=10
+    )
+    axes[1].set_xlabel("Limiar de Decisão Operacional (τ)", fontsize=10)
+    axes[1].set_ylabel("Custo Total Estimado em Dólares (US$)", fontsize=10)
+    axes[1].legend(loc="upper left", frameon=True, fontsize=8)
+    axes[1].grid(True, alpha=0.25, linestyle="--")
+
+    fig_path_8 = output_dir / "fig_08_model_calibration_and_cost_curve.png"
+    fig.savefig(fig_path_8, dpi=300)
+    plt.close(fig)
+    figures["fig_08"] = fig_path_8
+
+    print("Todas as 8 figuras editoriais geradas com sucesso a 300 DPI!")
     return figures
 
 
