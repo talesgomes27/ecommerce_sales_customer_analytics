@@ -248,14 +248,14 @@ def _build_typst_content(scenario: dict[str, Any], risk_source: str | None = Non
 
 
 def generate_executive_pdf(
-    scenario: dict[str, Any], output_path: str | Path, risk_source: str = "Heurística"
+    scenario: dict[str, Any], output_path: str | Path, risk_source: str | None = None
 ) -> Path:
     """Gera um parecer executivo em PDF (One-Pager) a partir dos dados do cenário simulado.
 
     Args:
         scenario: Dicionário contendo os parâmetros de entrada e KPIs da simulação.
         output_path: Caminho de destino para salvar o arquivo PDF.
-        risk_source: Modo de inferência empregado ("Heurística" ou "ML").
+        risk_source: Modo de inferência empregado ("Heurística" ou "ML"). Se None, extrai do dict.
 
     Returns:
         Path do arquivo PDF compilado.
@@ -263,12 +263,13 @@ def generate_executive_pdf(
     Raises:
         ExecutivePdfError: Caso a compilação via Typst falhe.
     """
+    resolved_source = risk_source or str(scenario.get("risk_source", "Heurística"))
     dest = Path(output_path).resolve()
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     temp_path: Path | None = None
     try:
-        typst_code = _build_typst_content(scenario, risk_source=risk_source)
+        typst_code = _build_typst_content(scenario, risk_source=resolved_source)
 
         temp_file = tempfile.NamedTemporaryFile(
             suffix=".typ", mode="w", encoding="utf-8", delete=False
@@ -299,14 +300,12 @@ def generate_executive_pdf(
                 pass
 
 
-def generate_executive_pdf_bytes(
-    scenario: dict[str, Any], risk_source: str = "Heurística"
-) -> bytes:
+def generate_executive_pdf_bytes(scenario: dict[str, Any], risk_source: str | None = None) -> bytes:
     """Gera o parecer executivo em PDF e retorna diretamente os bytes compilados.
 
     Args:
         scenario: Dicionário contendo os parâmetros e resultados do cenário.
-        risk_source: Modo de inferência empregado ("Heurística" ou "ML").
+        risk_source: Modo de inferência empregado ("Heurística" ou "ML"). Se None, extrai do dict.
 
     Returns:
         Bytes brutos do documento PDF.
@@ -314,11 +313,12 @@ def generate_executive_pdf_bytes(
     Raises:
         ExecutivePdfError: Caso a compilação falhe.
     """
+    resolved_source = risk_source or str(scenario.get("risk_source", "Heurística"))
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp_pdf:
         tmp_pdf_path = Path(tmp_pdf.name)
 
     try:
-        generate_executive_pdf(scenario, tmp_pdf_path, risk_source=risk_source)
+        generate_executive_pdf(scenario, tmp_pdf_path, risk_source=resolved_source)
         return tmp_pdf_path.read_bytes()
     finally:
         if tmp_pdf_path.exists():

@@ -440,7 +440,7 @@ scenario_dict = {
 pdf_bytes: bytes | None = None
 pdf_error: str | None = None
 try:
-    pdf_bytes = generate_executive_pdf_bytes(scenario_dict, risk_source=risk_source)
+    pdf_bytes = generate_executive_pdf_bytes(scenario_dict)
 except ExecutivePdfError as e:
     pdf_error = str(e)
 except Exception as e:
