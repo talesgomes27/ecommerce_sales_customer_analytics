@@ -52,5 +52,6 @@ Thumbs.db
 # Agent instructions and workspace metadata
 AGENTS.md
 agents.md
+.agents/
 
 

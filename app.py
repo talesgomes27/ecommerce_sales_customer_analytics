@@ -23,10 +23,96 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 2. Inicialização do Motor Core
+# 2. Injeção de Estilo CSS Executivo de Alta Visibilidade
+st.markdown(
+    """
+    <style>
+    /* Estilização Geral do Canvas */
+    .stApp {
+        background-color: #f8fafc;
+        color: #0f172a;
+    }
+
+    /* Barra Lateral de Controles */
+    section[data-testid="stSidebar"] {
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    /* Cartões de Métrica / KPIs */
+    [data-testid="stMetric"] {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.1rem 1.25rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    [data-testid="stMetric"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-color: #cbd5e1;
+    }
+
+    [data-testid="stMetricLabel"] {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    [data-testid="stMetricValue"] {
+        font-size: 1.85rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+    }
+
+    /* Abas de Navegação */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: transparent;
+        padding-bottom: 6px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 44px;
+        white-space: pre-wrap;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.4rem 1.1rem;
+        transition: all 0.2s ease;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+    }
+
+    /* Container com Borda e Sombra para Plots e Tabelas */
+    .visual-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        margin-bottom: 1.5rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# 3. Inicialização do Motor Core
 simulator = BusinessScenarioSimulator()
 
-# 3. Cabeçalho Corporativo
+# 4. Cabeçalho Corporativo
 st.title("Simulador Estratégico de Precificação, Margem e Risco Operacional")
 st.caption(
     "Motor analítico de simulação what-if calibrado sobre o histórico empírico de 138.116 transações comerciais."
@@ -37,7 +123,7 @@ st.info(
     "a margem líquida passa a ser destruída por custos operacionais e risco de devolução?*"
 )
 
-# 4. Barra Lateral de Parâmetros Operacionais
+# 5. Barra Lateral de Parâmetros Operacionais
 st.sidebar.header("⚙️ Parâmetros do Cenário")
 
 with st.sidebar.expander("1. Estrutura de Preço & Volume", expanded=True):
@@ -131,7 +217,7 @@ with st.sidebar.expander("3. Segmentação & Canal", expanded=False):
         format_func=lambda x: x.value,
     )
 
-# 5. Execução do Cenário
+# 6. Execução do Cenário
 scenario_input = SimulationScenarioInput(
     unit_price=float(unit_price),
     unit_cost=float(unit_cost),
@@ -147,7 +233,7 @@ scenario_input = SimulationScenarioInput(
 
 result = simulator.simulate_scenario(scenario_input)
 
-# 6. Painel Superior de KPIs Executivos
+# 7. Painel Superior de KPIs Executivos
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 with kpi1:
@@ -173,7 +259,7 @@ with kpi3:
     st.metric(
         label="Break-even de Desconto (D*)",
         value=f"{be_pct:.1f}%",
-        delta=f"{diff_be:+.1f}% margem de folga",
+        delta=f"{diff_be:+.1f}% folga",
         delta_color="normal" if diff_be >= 0 else "inverse",
     )
 
@@ -187,11 +273,11 @@ with kpi4:
         delta_color="inverse",
     )
 
-# 7. Faixa de Alerta Sanitário de Risco
-st.markdown("---")
+# 8. Faixa de Alerta Sanitário de Risco
+st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 if result.risk_alert == RiskAlertLevel.SAFE_GREEN.value:
     st.success(
-        f"🟢 **OPERAÇÃO FINANCEIRAMENTE SEGURA:** O desconto concedido ({discount_pct_input}%) "
+        f"🟢 **OPERAÇÃO FINANCEIRAMENTE SEGURA:** O desconto praticado ({discount_pct_input}%) "
         f"está confortavelmente abaixo do teto de break-even ({be_pct:.1f}%). "
         f"Margem de contribuição saudável em {result.contribution_margin_pct:.1f}%."
     )
@@ -199,7 +285,7 @@ elif result.risk_alert == RiskAlertLevel.WARNING_YELLOW.value:
     st.warning(
         f"🟡 **ATENÇÃO À COMPRESSÃO DE MARGEM:** O desconto de {discount_pct_input}% aproxima a operação "
         f"do limite de rentabilidade ({be_pct:.1f}%). Margem líquida reduzida a {result.contribution_margin_pct:.1f}%. "
-        f"Monitore sensibilidade de devolução."
+        f"Monitore o volume e a taxa de devolução."
     )
 else:
     st.error(
@@ -208,7 +294,8 @@ else:
         f"caixa líquido devido à sobreposição de CMV, frete, impostos e custos reversos."
     )
 
-# 8. Análises Aprofundadas (Abas Interativas)
+# 9. Abas de Análise Visual e Tabular
+st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 tab_curve, tab_dre, tab_matrix = st.tabs(
     [
         "📈 Curva de Sensibilidade & Break-even",
@@ -231,41 +318,49 @@ with tab_dre:
     st.plotly_chart(fig_waterfall, use_container_width=True)
 
 with tab_matrix:
-    st.markdown("##### Simulação Tabular Passo a Passo")
-    df_matrix = pd.DataFrame(curve_data)
-    df_matrix["discount_pct"] = (df_matrix["discount_pct"] * 100).round(1).astype(str) + "%"
-    df_matrix["estimated_return_rate"] = (df_matrix["estimated_return_rate"] * 100).round(2).astype(
-        str
-    ) + "%"
-    df_matrix["estimated_cancellation_rate"] = (
-        df_matrix["estimated_cancellation_rate"] * 100
-    ).round(2).astype(str) + "%"
-    df_matrix["contribution_margin_pct"] = (
-        df_matrix["contribution_margin_pct"].round(1).astype(str) + "%"
-    )
+    st.markdown("#### Matriz de Simulação de Sensibilidade por Faixa de Desconto")
+    df_raw = pd.DataFrame(curve_data)
 
-    df_matrix = df_matrix.rename(
-        columns={
-            "discount_pct": "Desconto (%)",
-            "unit_net_price": "Preço Líquido ($)",
-            "net_revenue": "Receita Líquida ($)",
-            "total_cost": "Custo Total ($)",
-            "contribution_margin_value": "Margem Líquida ($)",
-            "contribution_margin_pct": "Margem (%)",
-            "estimated_return_rate": "Taxa Devolução",
-            "estimated_cancellation_rate": "Taxa Cancelamento",
-            "risk_alert": "Status Risco",
-            "is_profitable": "Lucrativo?",
+    # Cria cópia formatada para visualização
+    df_display = pd.DataFrame(
+        {
+            "Desconto": df_raw["discount_pct"].apply(lambda x: f"{x * 100:.1f}%"),
+            "Preço Líquido": df_raw["unit_net_price"].apply(lambda x: f"${x:,.2f}"),
+            "Receita Líquida": df_raw["net_revenue"].apply(lambda x: f"${x:,.2f}"),
+            "Custo Total": df_raw["total_cost"].apply(lambda x: f"${x:,.2f}"),
+            "Margem Líquida": df_raw["contribution_margin_value"].apply(lambda x: f"${x:,.2f}"),
+            "Margem %": df_raw["contribution_margin_pct"].apply(lambda x: f"{x:.1f}%"),
+            "Taxa Devolução": df_raw["estimated_return_rate"].apply(lambda x: f"{x * 100:.2f}%"),
+            "Taxa Cancelamento": df_raw["estimated_cancellation_rate"].apply(
+                lambda x: f"{x * 100:.2f}%"
+            ),
+            "Status Risco": df_raw["risk_alert"].apply(
+                lambda x: (
+                    "🟢 Seguro"
+                    if x == "SAFE_GREEN"
+                    else ("🟡 Alerta" if x == "WARNING_YELLOW" else "🔴 Perigo")
+                )
+            ),
+            "Lucrativo?": df_raw["is_profitable"].apply(lambda x: "Sim" if x else "Não"),
         }
     )
 
+    # Estilização condicional da tabela com destaque por linha
+    def style_rows(row: pd.Series) -> list[str]:
+        is_lucrativo = row["Lucrativo?"] == "Sim"
+        if not is_lucrativo:
+            return ["background-color: #fee2e2; color: #991b1b; font-weight: 500"] * len(row)
+        return ["background-color: #ffffff; color: #0f172a"] * len(row)
+
+    styled_df = df_display.style.apply(style_rows, axis=1)
+
     st.dataframe(
-        df_matrix,
+        styled_df,
         use_container_width=True,
         hide_index=True,
     )
 
-# 9. Rodapé
+# 10. Rodapé
 st.markdown("---")
 st.caption(
     "E-Commerce Sales & Customer Analytics · Motor Core Desacoplado (`src.core.simulator`) · "

@@ -1,4 +1,4 @@
-"""Gráficos interativos em Plotly para visualização de rentabilidade, risco e sensibilidade."""
+"""Gráficos interativos em Plotly para visualização de rentabilidade, risco e sensibilidade com alto contraste visual."""
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -25,125 +25,141 @@ def plot_discount_sensitivity_curve(
         specs=[[{"secondary_y": True}]],
     )
 
-    # 1. Zona de destruição de margem (vermelho translúcido)
+    # 1. Zona de destruição de margem (vermelho suave com destaque nítido)
     max_d = df["discount_pct_100"].max()
     if be_pct < max_d:
         fig.add_vrect(
             x0=be_pct,
             x1=max_d,
-            fillcolor="rgba(231, 76, 60, 0.12)",
+            fillcolor="rgba(239, 68, 68, 0.14)",
             layer="below",
-            line_width=0,
-            annotation_text="Zona de Destruição de Margem",
+            line_width=1,
+            line_dash="dot",
+            line_color="rgba(220, 38, 38, 0.4)",
+            annotation_text="⚠️ Zona de Destruição de Margem",
             annotation_position="top right",
-            annotation_font={"color": "#c0392b", "size": 11, "family": "sans-serif"},
+            annotation_font={"color": "#b91c1c", "size": 12, "weight": "bold"},
         )
 
-    # 2. Linha de Margem de Contribuição Líquida (USD)
+    # 2. Linha de Margem de Contribuição Líquida (USD) - Azul Real vibrante de alto contraste
     fig.add_trace(
         go.Scatter(
             x=df["discount_pct_100"],
             y=df["contribution_margin_value"],
             mode="lines+markers",
             name="Margem de Contribuição ($)",
-            line={"color": "#1b4f72", "width": 3},
-            marker={"size": 6, "color": "#1b4f72"},
-            hovertemplate="Desconto: %{x:.1f}%<br>Margem Líquida: $%{y:,.2f}<extra></extra>",
+            line={"color": "#2563eb", "width": 3.5},
+            marker={"size": 6, "color": "#1d4ed8"},
+            hovertemplate="<b>Desconto: %{x:.1f}%</b><br>Margem Líquida: <b>$%{y:,.2f}</b><extra></extra>",
         ),
         secondary_y=False,
     )
 
-    # 3. Linha de Taxa de Devolução Projetada (%)
+    # 3. Linha de Taxa de Devolução Projetada (%) - Laranja Âmbar vibrante
     fig.add_trace(
         go.Scatter(
             x=df["discount_pct_100"],
             y=df["return_rate_100"],
-            mode="lines",
-            name="Risco de Devolução (%)",
-            line={"color": "#e67e22", "width": 2, "dash": "dot"},
-            hovertemplate="Desconto: %{x:.1f}%<br>Taxa de Devolução: %{y:.2f}%<extra></extra>",
+            mode="lines+markers",
+            name="Taxa de Devolução Estimada (%)",
+            line={"color": "#ea580c", "width": 2.5, "dash": "dash"},
+            marker={"size": 5, "color": "#c2410c", "symbol": "circle"},
+            hovertemplate="<b>Desconto: %{x:.1f}%</b><br>Taxa de Devolução: <b>%{y:.2f}%</b><extra></extra>",
         ),
         secondary_y=True,
     )
 
-    # 4. Linha de Breakeven horizontal ($0)
+    # 4. Linha de Breakeven horizontal ($0) - Cinza sólido nítido
     fig.add_hline(
         y=0,
-        line={"color": "#7f8c8d", "width": 1.5, "dash": "dash"},
+        line={"color": "#64748b", "width": 2, "dash": "dash"},
         secondary_y=False,
     )
 
     # 5. Marcador vertical de Break-even
     fig.add_vline(
         x=be_pct,
-        line={"color": "#c0392b", "width": 2, "dash": "dash"},
-        annotation_text=f"Break-even ({be_pct:.1f}%)",
+        line={"color": "#dc2626", "width": 2.5, "dash": "dashdot"},
+        annotation_text=f"Break-even: {be_pct:.1f}%",
         annotation_position="bottom right",
-        annotation_font={"color": "#c0392b", "size": 11, "weight": "bold"},
+        annotation_font={"color": "#b91c1c", "size": 12, "weight": "bold"},
     )
 
-    # 6. Ponto do Cenário Atual selecionado
+    # 6. Ponto do Cenário Atual selecionado (Diamante grande com borda branca)
     curr_point = df.iloc[(df["discount_pct_100"] - curr_pct).abs().argsort()[:1]]
     if not curr_point.empty:
+        is_safe = curr_pct <= be_pct
         fig.add_trace(
             go.Scatter(
                 x=[curr_pct],
                 y=curr_point["contribution_margin_value"].values,
                 mode="markers",
-                name="Cenário Atual",
+                name="Cenário Atual Selecionado",
                 marker={
-                    "color": "#27ae60" if curr_pct <= be_pct else "#e74c3c",
-                    "size": 13,
+                    "color": "#10b981" if is_safe else "#ef4444",
+                    "size": 15,
                     "symbol": "diamond",
-                    "line": {"color": "#ffffff", "width": 2},
+                    "line": {"color": "#ffffff", "width": 2.5},
                 },
-                hovertemplate="<b>Cenário Selecionado</b><br>Desconto: %{x:.1f}%<br>Margem: $%{y:,.2f}<extra></extra>",
+                hovertemplate="<b>🎯 Cenário Selecionado</b><br>Desconto: <b>%{x:.1f}%</b><br>Margem: <b>$%{y:,.2f}</b><extra></extra>",
             ),
             secondary_y=False,
         )
 
-    # Layout corporativo e responsivo
+    # Layout corporativo de alta visibilidade e nitidez
     fig.update_layout(
         title={
             "text": "<b>Curva de Sensibilidade: Margem Líquida vs. Desconto Comercial</b>",
-            "font": {"size": 16, "color": "#2c3e50"},
-            "x": 0.0,
+            "font": {"size": 17, "color": "#0f172a"},
+            "x": 0.02,
+            "y": 0.95,
         },
         xaxis={
-            "title": "<b>Desconto Concedido (%)</b>",
+            "title": "<b>Desconto Comercial Aplicado (%)</b>",
             "ticksuffix": "%",
-            "gridcolor": "#f1f2f6",
-            "showline": True,
-            "linecolor": "#bdc3c7",
-        },
-        yaxis={
-            "title": "<b>Margem de Contribuição (USD)</b>",
-            "tickprefix": "$",
-            "gridcolor": "#f1f2f6",
+            "gridcolor": "#e2e8f0",
             "zeroline": False,
             "showline": True,
-            "linecolor": "#bdc3c7",
+            "linecolor": "#94a3b8",
+            "tickfont": {"size": 12, "color": "#334155"},
+            "title_font": {"size": 13, "color": "#0f172a"},
+        },
+        yaxis={
+            "title": "<b>Margem de Contribuição Líquida (USD)</b>",
+            "tickprefix": "$",
+            "gridcolor": "#e2e8f0",
+            "zeroline": False,
+            "showline": True,
+            "linecolor": "#94a3b8",
+            "tickfont": {"size": 12, "color": "#334155"},
+            "title_font": {"size": 13, "color": "#0f172a"},
         },
         yaxis2={
-            "title": "<b>Taxa de Devolução Estimada (%)</b>",
+            "title": "<b>Taxa de Devolução Projetada (%)</b>",
             "ticksuffix": "%",
             "overlaying": "y",
             "side": "right",
             "showgrid": False,
-            "range": [0, max(25.0, df["return_rate_100"].max() * 1.3)],
+            "tickfont": {"size": 12, "color": "#ea580c"},
+            "title_font": {"size": 13, "color": "#ea580c"},
+            "range": [0, max(26.0, df["return_rate_100"].max() * 1.35)],
         },
-        template="plotly_white",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
         hovermode="x unified",
         legend={
             "orientation": "h",
             "yanchor": "bottom",
-            "y": 1.03,
+            "y": 1.05,
             "xanchor": "right",
             "x": 1.0,
-            "font": {"size": 11},
+            "font": {"size": 12, "color": "#334155"},
+            "bgcolor": "rgba(255, 255, 255, 0.9)",
+            "bordercolor": "#e2e8f0",
+            "borderwidth": 1,
         },
-        margin={"l": 60, "r": 60, "t": 80, "b": 50},
-        height=450,
+        margin={"l": 65, "r": 65, "t": 90, "b": 55},
+        height=480,
     )
 
     return fig
@@ -190,12 +206,13 @@ def plot_waterfall_cost_breakdown(
             x=x_labels,
             textposition="outside",
             text=[f"${abs(v):,.0f}" for v in y_values],
+            textfont={"size": 12, "color": "#0f172a"},
             y=y_values,
-            connector={"line": {"color": "#7f8c8d", "width": 1, "dash": "dot"}},
-            increasing={"marker": {"color": "#27ae60"}},
-            decreasing={"marker": {"color": "#e74c3c"}},
+            connector={"line": {"color": "#64748b", "width": 1.5, "dash": "dot"}},
+            increasing={"marker": {"color": "#10b981"}},
+            decreasing={"marker": {"color": "#ef4444"}},
             totals={
-                "marker": {"color": "#1b4f72" if margin >= 0 else "#c0392b"},
+                "marker": {"color": "#1e3a8a" if margin >= 0 else "#dc2626"},
             },
         )
     )
@@ -203,18 +220,26 @@ def plot_waterfall_cost_breakdown(
     fig.update_layout(
         title={
             "text": "<b>DRE Gerencial da Operação: Decomposição de Custos e Risco</b>",
-            "font": {"size": 14, "color": "#2c3e50"},
-            "x": 0.0,
+            "font": {"size": 16, "color": "#0f172a"},
+            "x": 0.02,
         },
-        xaxis={"tickangle": -15},
+        xaxis={
+            "tickangle": -15,
+            "tickfont": {"size": 12, "color": "#334155"},
+            "showline": True,
+            "linecolor": "#94a3b8",
+        },
         yaxis={
-            "title": "Valor Consolidado (USD)",
+            "title": "<b>Valor Consolidado (USD)</b>",
             "tickprefix": "$",
-            "gridcolor": "#f1f2f6",
+            "gridcolor": "#e2e8f0",
+            "tickfont": {"size": 12, "color": "#334155"},
+            "title_font": {"size": 13, "color": "#0f172a"},
         },
-        template="plotly_white",
-        margin={"l": 50, "r": 40, "t": 60, "b": 60},
-        height=360,
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
+        margin={"l": 60, "r": 50, "t": 70, "b": 65},
+        height=390,
     )
 
     return fig
