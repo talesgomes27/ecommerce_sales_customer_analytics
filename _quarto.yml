@@ -33,6 +33,8 @@ format:
     title-block-banner: true
     fig-dpi: 300
     df-print: paged
+    css: styles.css
+    include-after-body: toggle-toc.html
 
 execute:
   freeze: auto

@@ -1,0 +1,64 @@
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const marginSidebar = document.getElementById("quarto-margin-sidebar");
+  if (!marginSidebar) return;
+
+  const tocNav = marginSidebar.querySelector("nav#TOC");
+  if (!tocNav) return;
+
+  const tocTitle = tocNav.querySelector("#toc-title") || tocNav.querySelector("h2");
+  if (!tocTitle) return;
+
+  // Cria o wrapper com o título e o botão de recolher
+  const wrapper = document.createElement("div");
+  wrapper.className = "toc-header-wrapper";
+
+  const newTitle = document.createElement("h2");
+  newTitle.id = tocTitle.id;
+  newTitle.textContent = tocTitle.textContent;
+
+  const collapseBtn = document.createElement("button");
+  collapseBtn.id = "toc-collapse-action";
+  collapseBtn.className = "toc-collapse-btn";
+  collapseBtn.innerHTML = "<span>◀</span> Ocultar";
+  collapseBtn.setAttribute("aria-label", "Ocultar sumário da página");
+  collapseBtn.setAttribute("title", "Ocultar sumário para expandir tabelas e dados");
+
+  wrapper.appendChild(newTitle);
+  wrapper.appendChild(collapseBtn);
+  tocTitle.parentNode.replaceChild(wrapper, tocTitle);
+
+  // Cria o botão flutuante para restaurar o sumário
+  const restoreBtn = document.createElement("button");
+  restoreBtn.id = "toc-restore-btn";
+  restoreBtn.innerHTML = "📑 Sumário";
+  restoreBtn.setAttribute("aria-label", "Mostrar sumário da página");
+  restoreBtn.setAttribute("title", "Clique para exibir o sumário da página");
+  document.body.appendChild(restoreBtn);
+
+  // Ações de clique
+  function collapseTOC() {
+    document.body.classList.add("toc-collapsed");
+    try {
+      localStorage.setItem("quarto-toc-collapsed", "true");
+    } catch (e) {}
+  }
+
+  function expandTOC() {
+    document.body.classList.remove("toc-collapsed");
+    try {
+      localStorage.setItem("quarto-toc-collapsed", "false");
+    } catch (e) {}
+  }
+
+  collapseBtn.addEventListener("click", collapseTOC);
+  restoreBtn.addEventListener("click", expandTOC);
+
+  // Restaura estado prévio salvo pelo usuário
+  try {
+    if (localStorage.getItem("quarto-toc-collapsed") === "true") {
+      collapseTOC();
+    }
+  } catch (e) {}
+});
+</script>
