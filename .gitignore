@@ -46,3 +46,9 @@ credentials.json
 Thumbs.db
 
 **/*.quarto_ipynb
+
+# Agent instructions and workspace metadata
+AGENTS.md
+agents.md
+
+
