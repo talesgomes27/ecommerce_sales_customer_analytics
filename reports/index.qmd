@@ -38,7 +38,7 @@ No entanto, a decomposição das transações revela três pontos cegos que limi
 
 A @tbl-yearly sintetiza a evolução histórica dos principais indicadores executivos:
 
-| Ano | Transações | Faturamento Líquido (US$) | Lucro Operacional (US$) | Ticket Médio (US$) | Margem Média (%) | Taxa de Devolução (%) | Taxa de Cancelamento (%) |
+| Ano | Transações | Faturamento Líquido (USD) | Lucro Operacional (USD) | Ticket Médio (USD) | Margem Média (%) | Taxa de Devolução (%) | Taxa de Cancelamento (%) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **2021** | 27.554 | 35.722.650,67 | 15.325.651,87 | 1.296,46 | 44,95% | 6,62% | 5,85% |
 | **2022** | 27.564 | 35.327.882,62 | 15.167.978,69 | 1.281,67 | 45,01% | 6,62% | 6,14% |
@@ -89,13 +89,13 @@ A @tbl-methodology resume os objetivos, as decisões de arquitetura e as entrega
 | Estágio | Gate / Fase | Foco Técnico e Decisões Adotadas | Artefatos e Entregáveis |
 | :--- | :--- | :--- | :--- |
 | **Pré-Código** | **Gate 1: Data Discovery & Contracts** | Auditoria das 46 colunas, fechamento algébrico de receita e contratos Pandera | `docs/00_archetype.md`, `docs/01-data-discovery-and-contracts.md` |
-| **Pré-Código** | **Gate 2: PRD & Hypotheses** | Formulação das hipóteses $H_1$ a $H_5$, matriz de métricas e split Out-of-Time | `docs/02-PRD-and-specs.md` |
+| **Pré-Código** | **Gate 2: PRD & Hypotheses** | Formulação das hipóteses H1 a H5, matriz de métricas e split Out-of-Time | `docs/02-PRD-and-specs.md` |
 | **Pré-Código** | **Gate 3: Architecture & Schema** | Definição da topologia em camadas, registro de ADRs (0001 a 0003) e storyboard | `docs/03-architecture-and-schema.md`, `docs/adr/` |
 | **Pré-Código** | **Gate 4: Scaffolding & Tools** | Estruturação de diretórios, `pyproject.toml` (PEP 621), `_quarto.yml` e scripts | `docs/04-scaffolding-and-conventions.md`, `src/` |
 | **Pré-Código** | **Gate 5: Implementation Plan** | Plano de cinco fases com TDD, matriz de rastreabilidade e critérios de aceite | `docs/05-implementation-plan.md` |
 | **Execução** | **Fase 1: Dados & Contratos** | Implementação de `loader.py` e validação de contratos de integridade em lote | `src/data/contracts.py`, `src/data/loader.py`, `tests/test_contracts.py` |
 | **Execução** | **Fase 2: Feature Engineering** | Features retroativas *point-in-time*, cálculo RFM dinâmico e split temporal | `src/features/builder.py`, `src/features/rfm.py`, `tests/test_features.py` |
-| **Execução** | **Fase 3: Modelagem Estatística** | K-Means com $K=4$, curva elástica de desconto ($D^*$) e treino LightGBM | `src/models/clustering.py`, `src/models/pricing.py`, `src/models/train.py` |
+| **Execução** | **Fase 3: Modelagem Estatística** | K-Means com K = 4, curva elástica de desconto (D*) e treino LightGBM | `src/models/clustering.py`, `src/models/pricing.py`, `src/models/train.py` |
 | **Execução** | **Fase 4: Avaliação & Diagnóstico** | Teste cego 2025 (PR-AUC = 0,578), ganho factual, Mann-Whitney U e calibração | `src/evaluation/metrics.py`, `tests/test_models.py` |
 | **Execução** | **Fase 5: Visualização & Relatório** | Exportação de 8 figuras canônicas a 300 DPI e compilação do relatório Quarto | `src/evaluation/plots.py`, `reports/index.qmd`, `_site/` |
 
@@ -127,7 +127,7 @@ Dos 138.116 pedidos, 1.296 (0,94%) foram fechados com margem negativa. A perda a
 
 A análise em faixas percentuais de desconto (@tbl-discount-buckets) demonstra a relação entre o desconto concedido e o risco de prejuízo:
 
-| Faixa de Desconto (%) | Volume de Pedidos | Margem Média (%) | Lucro Mediano (US$) | Pedidos Deficitários | Proporção no Prejuízo (%) |
+| Faixa de Desconto (%) | Volume de Pedidos | Margem Média (%) | Lucro Mediano (USD) | Pedidos Deficitários | Proporção no Prejuízo (%) |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | **0% a 10%** | 56.764 | 54,2% | 512,30 | 0 | 0,00% |
 | **10% a 20%** | 41.810 | 46,8% | 415,10 | 0 | 0,00% |
@@ -155,7 +155,7 @@ A comparação do Custo de Aquisição de Clientes (CAC) com a receita líquida 
 
 A @tbl-mkt compara o retorno econômico entre as fontes de atração:
 
-| Canal de Marketing | Clientes Adquiridos | CAC Médio (US$) | LTV Médio (US$) | Razão LTV / CAC | Lucro Médio / CAC |
+| Canal de Marketing | Clientes Adquiridos | CAC Médio (USD) | LTV Médio (USD) | Razão LTV / CAC | Lucro Médio / CAC |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Organic Search** | 5.004 | 42,12 | 2.125,30 | **50,5x** | 21,7x |
 | **Google Ads** | 3.721 | 42,26 | 1.897,38 | **44,9x** | 19,3x |
@@ -184,7 +184,7 @@ Aplicamos o modelo de agrupamento K-Means sobre três dimensões comportamentais
 
 A @tbl-rfm apresenta o perfil médio dos centroides encontrados:
 
-| Segmento | Clientes | Proporção (%) | Recência Média (dias) | Frequência Média | Valor Gasto Médio (US$) | Ticket Médio (US$) |
+| Segmento | Clientes | Proporção (%) | Recência Média (dias) | Frequência Média | Valor Gasto Médio (USD) | Ticket Médio (USD) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Champions** | 7.854 | 31,5% | 29,8 | 6,4 | 8.146,00 | 1.272,81 |
 | **Loyal Customers** | 5.459 | 21,9% | 261,3 | 7,5 | 10.526,81 | 1.403,57 |
@@ -205,7 +205,7 @@ A @fig-rfm ilustra a separação dos clusters no espaço das duas primeiras comp
 ### Desempenho por Categoria de Produto
 A abertura das linhas de catálogo em 15 categorias revela um descompasso estrutural entre volume faturado e margem percentual retida. A @tbl-categories consolida as métricas comerciais agregadas:
 
-| Categoria | Faturamento (US$) | Lucro Operacional (US$) | Margem Líquida (%) | Preço Médio (US$) | Volume de Itens |
+| Categoria | Faturamento (USD) | Lucro Operacional (USD) | Margem Líquida (%) | Preço Médio (USD) | Volume de Itens |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Electronics** | 41.148.162,90 | 14.103.982,74 | **34,28%** | 797,79 | 55.784 |
 | **Jewelry** | 25.561.333,78 | 10.391.635,32 | 40,65% | 567,23 | 48.859 |
@@ -267,7 +267,7 @@ Comparamos dois estimadores:
 ### Desempenho Preditivo no Teste Cego ($H_3$)
 A @tbl-eval resume o desempenho dos modelos no conjunto de teste cego de 2025:
 
-| Modelo | PR-AUC | ROC-AUC | Brier Score | Limiar Ótimo ($\tau^*$) | F1 Ótimo | Precisão no Corte | Recall no Corte |
+| Modelo | PR-AUC | ROC-AUC | Brier Score | Limiar Ótimo (tau*) | F1 Ótimo | Precisão no Corte | Recall no Corte |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Taxa Base Ingênua** | 0,129 | 0,500 | 0,113 | - | - | 0,129 | 1,000 |
 | **Baseline Logit** | 0,188 | 0,616 | 0,229 | 0,52 | 0,274 | 0,221 | 0,361 |
@@ -309,14 +309,14 @@ A política de corte não deve adotar o limiar arbitrário de 0,50 sem respaldo 
 
 A @tbl-threshold-costs simula os impactos operacionais e financeiros para diferentes valores de limiar no conjunto de teste cego de 2025 (3.598 eventos desfavoráveis em 27.598 pedidos):
 
-| Limiar ($\tau$) | Falsos Negativos (FN) | Falsos Positivos (FP) | Custo FN (US$) | Custo FP (US$) | Custo Total (US$) | Economia Líquida (US$) | Perfil da Decisão |
+| Limiar (tau) | Falsos Negativos (FN) | Falsos Positivos (FP) | Custo FN (USD) | Custo FP (USD) | Custo Total (USD) | Economia Líquida (USD) | Perfil da Decisão |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **0,10** | 0 | 23.159 | 0,00 | 185.272,00 | 185.272,00 | -23.362,00 | Conservadorismo extremo (intervenção em massa) |
 | **0,25** | 33 | 19.536 | 1.485,00 | 156.288,00 | 157.773,00 | 4.137,00 | Alta cobertura com sobrecarga operacional |
 | **0,35** | 77 | 15.646 | 3.465,00 | 125.168,00 | 128.633,00 | 33.277,00 | Maximização do F1-Score (Recall 60,7%) |
 | **0,45** | 197 | 10.702 | 8.865,00 | 85.616,00 | 94.481,00 | 67.429,00 | Zona de transição equilibrada |
 | **0,50** | 383 | 7.620 | 17.235,00 | 60.960,00 | 78.195,00 | 83.715,00 | Ponto de corte balanceado padrão |
-| **0,55** | **891** | **3.665** | **40.095,00** | **29.320,00** | **69.415,00** | **92.495,00** | **Mínimo Global de Custo Financeiro ($\tau^*$)** |
+| **0,55** | **891** | **3.665** | **40.095,00** | **29.320,00** | **69.415,00** | **92.495,00** | **Mínimo Global de Custo Financeiro (tau*)** |
 | **0,60** | 1.631 | 1.279 | 73.395,00 | 10.232,00 | 83.627,00 | 78.283,00 | Alta precisão com perda de cobertura |
 | **0,70** | 3.299 | 82 | 148.455,00 | 656,00 | 149.111,00 | 12.799,00 | Intervenção mínima |
 | **0,90** | 3.598 | 0 | 161.910,00 | 0,00 | 161.910,00 | 0,00 | Política passiva / Inação (Sem modelo) |
@@ -356,7 +356,7 @@ A decomposição dos motivos revela que **62,1% das devoluções (5.878 pedidos)
 
 A @tbl-returns-action detalha o dimensionamento de impacto e o plano de mitigação para cada causa de devolução:
 
-| Causa Raiz de Devolução | Volume | Proporção (%) | Custo Reverso Acumulado (US$) | Categoria Predominante | Ação Mitigadora no Fulfillment e Catálogo |
+| Causa Raiz de Devolução | Volume | Proporção (%) | Custo Reverso Acumulado (USD) | Categoria Predominante | Ação Mitigadora no Fulfillment e Catálogo |
 | :--- | :---: | :---: | :---: | :--- | :--- |
 | **Wrong Product** | 1.237 | 13,07% | 55.665,00 | Electronics, Fashion | Leitura de código de barras 2D obrigatória antes do empacotamento |
 | **Other** | 1.208 | 12,77% | 54.360,00 | Variadas | Refinamento dos formulários de SAC para redução de respostas genéricas |
@@ -408,10 +408,10 @@ A @tbl-roadmap estabelece a sequência de execução das recomendações ao long
 
 | Fase | Prazo | Iniciativa Principal | Responsável | Métrica de Sucesso (OKR) |
 | :--- | :---: | :--- | :--- | :--- |
-| **Q1** | Mês 1–3 | Implementação da trava sistêmica de desconto em 35% no e-commerce | Pricing & TI | Zerar operações com margem negativa ($\text{Profit} < 0$) |
-| **Q2** | Mês 4–6 | Integração do modelo LightGBM At-Purchase ($\tau^* = 0,55$) ao checkout | Data Science & Engenharia | Reduzir a taxa de devolução de 7,15% para $< 6,00\%$ |
+| **Q1** | Mês 1–3 | Implementação da trava sistêmica de desconto em 35% no e-commerce | Pricing & TI | Zerar operações com margem negativa (Lucro < 0) |
+| **Q2** | Mês 4–6 | Integração do modelo LightGBM At-Purchase (tau* = 0,55) ao checkout | Data Science & Engenharia | Reduzir a taxa de devolução de 7,15% para abaixo de 6,00% |
 | **Q3** | Mês 7–9 | Bipagem 2D no armazém e atualização de guias de medidas no catálogo | Operações & Logística | Reduzir em 40% devoluções por produto errado e tamanho |
-| **Q4** | Mês 10–12 | Realocação de mídia para canais $> 44x$ e régua de CRM para clientes em risco | Growth & CRM | Aumentar LTV/CAC ponderado em 15% e reativar 350 clientes |
+| **Q4** | Mês 10–12 | Realocação de mídia para canais > 44x e régua de CRM para clientes em risco | Growth & CRM | Aumentar LTV/CAC ponderado em 15% e reativar 350 clientes |
 
 : Cronograma tático de execução das recomendações de inteligência de e-commerce. {#tbl-roadmap}
 
