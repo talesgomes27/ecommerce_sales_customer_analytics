@@ -25,6 +25,9 @@ dependencies = [
     "pandera[polars]>=0.20.0",
     "ipykernel>=6.29.0",
     "great-tables>=1.1.0",
+    "pydantic>=2.7.0",
+    "streamlit>=1.35.0",
+    "plotly>=5.22.0",
 ]
 
 [project.optional-dependencies]
@@ -39,6 +42,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-cov>=5.0.0",
     "ruff>=0.5.0",
+    "rust-just>=1.59.0",
 ]
 
 [tool.ruff]
