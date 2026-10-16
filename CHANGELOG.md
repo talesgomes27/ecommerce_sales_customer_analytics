@@ -16,10 +16,17 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Pipeline preditivo At-Purchase com LightGBM (`src/models/train.py`), alcançando PR-AUC de 0,578 (lift de 4,47x sobre a taxa base) e ROC-AUC de 0,885 no teste cego temporal de 2025.
 - Avaliação de custos operacionais com simulação de 9 limiares de decisão, identificando o ponto de custo mínimo global em $\tau^* = 0,55$ (economia líquida de \$92.495/ano).
 - Teste de hipótese estatística via Mann-Whitney U ($p < 0,0001$, Cohen's $d = 1,19$) confirmando penalidade média de -0,53 estrelas por atraso na entrega.
-- Gerador de 9 figuras editoriais em alta resolução (300 DPI, `aspect=1`, `sns.despine`) em `src/evaluation/plots.py`.
-- Relatório executivo completo em Quarto (`reports/index.qmd`) com compilação para site estático em `_site/`.
-- Suíte automatizada com 16 testes unitários e de contratos contábeis passando em verde (`tests/`).
+- Gerador de figuras editoriais em alta resolução (300 DPI, `aspect=1`, `sns.despine`) em `src/evaluation/plots.py`.
+- Módulo `src/evaluation/tables.py` com 10 tabelas executivas estilizadas via `great_tables`, integrando formatação tipada de moedas, porcentagens e realce condicional de perdas.
+- Suíte automatizada com 26 testes unitários e de contratos contábeis passando em verde (`tests/`).
+- Sumário de navegação retrátil (TOC Collapsible) com alternância fluida via script JavaScript e botão flutuante para liberação de tela cheia.
 - Workflows de CI/CD para GitHub Actions com lint, testes e deploy automatizado no GitHub Pages.
+
+### Alterado
+- Reorganização das bases de dados locais na pasta canônica `data/raw/` e exclusão de rastreamento no Git para manter o repositório remoto enxuto e seguro.
+- Adição de guardas de execução graciosa nos testes de contratos para permitir execuções em ambientes de CI sem a base bruta.
+- Versionamento do diretório de cache `_freeze/` no Quarto para viabilizar compilação estática instantânea no GitHub Pages sem kernel em tempo de execução.
 
 ### Corrigido
 - Substituição do diagrama Mermaid por infográfico editorial a 300 DPI (`fig_timeline_leakage.png`), eliminando problemas de contraste e legibilidade em navegadores.
+- Eliminação do conflito de caracteres matemáticos no Markdown que provocava fusão de colunas monetárias e colunas fantasmas sem título nas tabelas.

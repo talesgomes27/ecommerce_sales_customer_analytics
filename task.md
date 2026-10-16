@@ -83,14 +83,16 @@
 ## 3. Fase de Release & Ops (`release-and-ops-pipeline`) — [EM ANDAMENTO]
 
 - [x] **Gate 1: Saneamento de Repositório, Segurança Pré-Push & Lockfiles**
-  - [x] Blindagem do `.gitignore` contra modelos e arquivos temporários
+  - [x] Blindagem do `.gitignore` contra modelos, arquivos temporários e datasets brutos (`data/raw/`)
+  - [x] Desmonitoramento dos 85MB de arquivos brutos do Git (`git rm --cached`)
   - [x] Varredura contra credenciais e segredos vazados (0 ocorrências)
-  - [x] Varredura contra arquivos > 50MB (0 arquivos excedentes)
-  - [x] Validação de integridade e sincronismo do `uv.lock`
+  - [x] Varredura contra arquivos > 50MB rastreados (0 arquivos excedentes)
+  - [x] Sincronização e validação de integridade do `uv.lock` com `great-tables`
   - [x] Checkpoint: Saneamento aprovado
 - [x] **Gate 2: Governança Git, Versionamento Semântico & Changelog**
   - [x] Definição de versão SemVer `v1.0.0`
-  - [x] Elaboração do `CHANGELOG.md` no padrão *Keep a Changelog*
+  - [x] Elaboração e atualização do `CHANGELOG.md` no padrão *Keep a Changelog*
+  - [x] Commits semânticos no padrão *Conventional Commits*
   - [x] Checkpoint: Histórico e changelog validados
 - [x] **Gate 3: Automação de CI/CD — GitHub Actions**
   - [x] Criação de `.github/workflows/ci.yml` (linter Ruff e suíte Pytest via uv)
@@ -98,11 +100,13 @@
   - [x] Checkpoint: Workflows de automação configurados
 - [/] **Gate 4: Deploy, Publicação & Empacotamento**
   - [x] Criação do arquivo de guarda `.nojekyll` em `_site/`
-  - [x] Compilação estática do site via `quarto render`
+  - [x] Compilação estática do site via `quarto render` com `_freeze/`
   - [ ] Push remoto para o GitHub (Aguardando autorização explícita do usuário)
 - [x] **Gate 5: Smoke Tests & Verificação Pós-Deploy**
   - [x] Smoke test das 9 figuras relativas no HTML: 100% íntegras (0 quebradas)
-  - [x] Suíte completa de 16 testes passando em verde
+  - [x] Auditoria estrutural das 10 tabelas `great_tables` no HTML compilado
+  - [x] Suíte completa de 26 testes passando em verde
   - [x] Linter Ruff 100% limpo
+
 
 
