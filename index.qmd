@@ -337,6 +337,17 @@ No Painel (b) da @fig-returns-pay, as taxas de devolução (entre 6,49% e 7,08%)
 
 ## Recomendações Executivas e Plano de Ação
 
+<!-- TODO: atualizar URL do Streamlit quando publicado em nuvem -->
+::: {.callout-note}
+## Simulador Interativo de Cenários What-If
+
+Para explorar dinamicamente o impacto de descontos na margem de contribuição líquida, estimar o risco de devolução por prazo de frete e calcular o ponto de equilíbrio (*break-even*) da operação em tempo real, utilize a aplicação interativa:
+
+[Acessar Simulador What-If (Streamlit)](app.py){.btn .btn-primary}
+
+*Para execução local:* `uv run streamlit run app.py`
+:::
+
 ::: {.callout-tip}
 ### Diretrizes Estratégicas e Simulação de Retorno Financeiro
 
