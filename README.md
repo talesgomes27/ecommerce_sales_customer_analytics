@@ -6,7 +6,7 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Package Manager: uv](https://img.shields.io/badge/uv-fast-blueviolet.svg)](https://github.com/astral-sh/uv)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Tests: 40 passed](https://img.shields.io/badge/tests-40%20passed-success.svg)](tests/)
+[![Tests: 50 passed](https://img.shields.io/badge/tests-50%20passed-success.svg)](tests/)
 
 Plataforma de inteligência de vendas, diagnóstico de margem de contribuição e simulação de cenários operacionais para comércio eletrônico. Integra auditoria rigorosa de contratos de dados, modelagem de propensão com calibração orientada a custo financeiro e um motor de simulação de decisões desacoplado da interface gráfica.
 
@@ -92,7 +92,7 @@ ecommerce_sales_customer_analytics/
 │   ├── reports/                # Parecer executivo em PDF (One-Pager compilado via Typst)
 │   │   └── executive_pdf.py    # Gerador de PDF em memória com tratamento de exceções
 │   └── ui/                     # Componentes visuais e gráficos interativos Plotly
-├── tests/                      # Suíte de 40 testes automatizados (Pytest)
+├── tests/                      # Suíte de 50 testes automatizados (Pytest)
 │   ├── test_contracts.py       # Validação de integridade de dados e álgebra contábil
 │   ├── test_executive_pdf.py   # Testes unitários de compilação e integridade do PDF
 │   ├── test_features.py        # Testes de separação temporal e ausência de lookahead
@@ -128,6 +128,45 @@ ecommerce_sales_customer_analytics/
 | **Qualidade de Código & Testes** | `Pytest`, `Pytest-Cov`, `Ruff` |
 | **Orquestração de Tarefas Locais** | `Just` (`rust-just`) |
 | **Integração e Entrega Contínua** | `GitHub Actions` (`ci.yml`, `publish.yml`) |
+
+---
+
+## 🧠 Pipeline de Inferência ML
+
+O simulador oferece dois motores de estimativa de risco operacional, alternáveis no topo do painel de KPIs:
+
+### Modo Principal (ML — LightGBM Calibrado)
+
+Modelo preditivo treinado em 2021-2024 (110.518 transações) e validado em holdout temporal cego de 2025 (27.598 transações):
+
+| Métrica | Valor |
+|---|---|
+| ROC-AUC | 0,9037 |
+| PR-AUC | 0,6346 |
+| Brier Score | 0,1674 |
+| F1 @ τ* | 0,5633 |
+| Recall | 80,13% |
+
+**Ponto de corte:** τ* calibrado = 0,154857 (via fórmula de Elkan, revertendo o `class_weight="balanced"` do treino contra a taxa base real de 13,04%).
+
+**Features:** 9 numéricas (`gross_sales`, `tax_amount`, `product_cost`, etc.) + 8 categóricas (`marketing_channel`, `sales_channel`, `region`, etc.). As features transacionais de cliente ausentes no formulário (idade, histórico, demografia) são fixadas em medianas/modos do conjunto de treino — compromisso documentado para viabilizar a demo sem alterar a UX do decisor.
+
+**Artefatos versionados:**
+- `models/lightgbm_at_purchase.joblib` (228,9 KB)
+- `models/baseline_logit_at_purchase.joblib` (2,8 KB)
+- `models/metadata.json` (hash SHA-256 do dataset, versões de runtime, τ* calibrado)
+
+### Modo Comparação (Heurística Calibrada)
+
+Motor determinístico baseado em médias históricas e deltas de categoria/canal. Não depende de features de cliente. Serve como baseline auditável e fallback automático caso o modelo ML falhe em runtime.
+
+### Garantias de Governança
+
+- **Anti-leakage:** contrato Pydantic com `extra="forbid"` e asserção contra `PROHIBITED_LEAKAGE_COLS` em runtime.
+- **Reprodutibilidade:** hash SHA-256 do dataset de treino registrado no metadata.
+- **Fallback resiliente:** se o `.joblib` estiver ausente ou corrompido, o app cai automaticamente no modo heurístico com `st.warning()`.
+- **PDF contextual:** o parecer executivo gerado indica explicitamente qual motor foi utilizado.
+- **Testes:** cobertura unitária dos 3 caminhos de propagação do `risk_source` no PDF (kwarg explícito, dict embutido e precedência kwarg > dict).
 
 ---
 
