@@ -194,11 +194,18 @@ window.Quarto = {
   <ul>
   <li><a href="#changelog" id="toc-changelog" class="nav-link active" data-scroll-target="#changelog"><span class="header-section-number">1</span> Changelog</a>
   <ul class="collapse">
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"><span class="header-section-number">1.1</span> [1.0.0] - 2026-10-16</a>
+  <li><a href="#frente-1-ml-em-produção-2026-10-18" id="toc-frente-1-ml-em-produção-2026-10-18" class="nav-link" data-scroll-target="#frente-1-ml-em-produção-2026-10-18"><span class="header-section-number">1.1</span> [Frente 1 — ML em Produção] — 2026-10-18</a>
   <ul class="collapse">
   <li><a href="#adicionado" id="toc-adicionado" class="nav-link" data-scroll-target="#adicionado"><span class="header-section-number">1.1.1</span> Adicionado</a></li>
-  <li><a href="#alterado" id="toc-alterado" class="nav-link" data-scroll-target="#alterado"><span class="header-section-number">1.1.2</span> Alterado</a></li>
-  <li><a href="#corrigido" id="toc-corrigido" class="nav-link" data-scroll-target="#corrigido"><span class="header-section-number">1.1.3</span> Corrigido</a></li>
+  <li><a href="#corrigido" id="toc-corrigido" class="nav-link" data-scroll-target="#corrigido"><span class="header-section-number">1.1.2</span> Corrigido</a></li>
+  <li><a href="#segurança-governança" id="toc-segurança-governança" class="nav-link" data-scroll-target="#segurança-governança"><span class="header-section-number">1.1.3</span> Segurança / Governança</a></li>
+  <li><a href="#métricas" id="toc-métricas" class="nav-link" data-scroll-target="#métricas"><span class="header-section-number">1.1.4</span> Métricas</a></li>
+  </ul></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"><span class="header-section-number">1.2</span> [1.0.0] - 2026-10-16</a>
+  <ul class="collapse">
+  <li><a href="#adicionado-1" id="toc-adicionado-1" class="nav-link" data-scroll-target="#adicionado-1"><span class="header-section-number">1.2.1</span> Adicionado</a></li>
+  <li><a href="#alterado" id="toc-alterado" class="nav-link" data-scroll-target="#alterado"><span class="header-section-number">1.2.2</span> Alterado</a></li>
+  <li><a href="#corrigido-1" id="toc-corrigido-1" class="nav-link" data-scroll-target="#corrigido-1"><span class="header-section-number">1.2.3</span> Corrigido</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -214,10 +221,48 @@ window.Quarto = {
 <h1 data-number="1"><span class="header-section-number">1</span> Changelog</h1>
 <p>Todas as alterações notáveis neste projeto serão documentadas neste arquivo.</p>
 <p>O formato baseia-se em <a href="https://keepachangelog.com/pt-BR/1.0.0/">Keep a Changelog</a>, e este projeto adota o <a href="https://semver.org/lang/pt-BR/">Versionamento Semântico</a>.</p>
-<section id="section" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="section"><span class="header-section-number">1.1</span> [1.0.0] - 2026-10-16</h2>
+<section id="frente-1-ml-em-produção-2026-10-18" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="frente-1-ml-em-produção-2026-10-18"><span class="header-section-number">1.1</span> [Frente 1 — ML em Produção] — 2026-10-18</h2>
 <section id="adicionado" class="level3" data-number="1.1.1">
 <h3 data-number="1.1.1" class="anchored" data-anchor-id="adicionado"><span class="header-section-number">1.1.1</span> Adicionado</h3>
+<ul>
+<li>Pipeline de serialização do modelo LightGBM At-Purchase calibrado via fórmula de Elkan (τ* balanceado = 0,55 → τ* calibrado = 0,154857). Commit <code>4742df3</code>.</li>
+<li>Módulo <code>src/models/inference.py</code> com <code>RiskModelInference</code> e contrato Pydantic <code>RiskScenarioInput</code> (anti-leakage via <code>PROHIBITED_LEAKAGE_COLS</code>).</li>
+<li>Toggle ML/Heurístico no <code>app.py</code>, com fallback automático para heurística caso o <code>.joblib</code> falhe. Commit <code>4742df3</code>.</li>
+<li>PDF executivo contextual (<code>src/reports/executive_pdf.py</code>): o cabeçalho indica o motor de inferência usado. Commit <code>4742df3</code>.</li>
+<li>Teste de regressão cobrindo os 3 caminhos de propagação de <code>risk_source</code> (kwarg explícito, dict embutido, precedência kwarg &gt; dict). Commit <code>d9bc0fb</code>.</li>
+<li>Seção “Pipeline de Inferência ML” no <code>README.md</code>, com métricas Out-of-Time (ROC-AUC 0,9037 / PR-AUC 0,6346 / Brier 0,1674). Commit <code>7a26064</code>.</li>
+</ul>
+</section>
+<section id="corrigido" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="corrigido"><span class="header-section-number">1.1.2</span> Corrigido</h3>
+<ul>
+<li>Incompatibilidade de assinatura no gerador de PDF sob reload dinâmico (bug identificado em produção durante deploy). Commit <code>54f44e5</code>.</li>
+</ul>
+</section>
+<section id="segurança-governança" class="level3" data-number="1.1.3">
+<h3 data-number="1.1.3" class="anchored" data-anchor-id="segurança-governança"><span class="header-section-number">1.1.3</span> Segurança / Governança</h3>
+<ul>
+<li>Hash SHA-256 do dataset de treino registrado em <code>models/metadata.json</code>.</li>
+<li>Versões de runtime (<code>scikit-learn</code>, <code>lightgbm</code>, <code>joblib</code>, Python) registradas.</li>
+<li>Anti-leakage em runtime: Pydantic com <code>extra="forbid"</code> + asserção contra <code>PROHIBITED_LEAKAGE_COLS</code>.</li>
+<li>Fallback resiliente: <code>st.warning()</code> + modo heurístico automático se o modelo falhar.</li>
+</ul>
+</section>
+<section id="métricas" class="level3" data-number="1.1.4">
+<h3 data-number="1.1.4" class="anchored" data-anchor-id="métricas"><span class="header-section-number">1.1.4</span> Métricas</h3>
+<ul>
+<li>50 testes verdes (49 originais + 1 regressão).</li>
+<li>Ruff limpo em 48 arquivos.</li>
+<li>CI verde em <code>7a26064</code>.</li>
+<li>Streamlit Cloud funcional com toggle ML/Heurístico.</li>
+</ul>
+</section>
+</section>
+<section id="section" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="section"><span class="header-section-number">1.2</span> [1.0.0] - 2026-10-16</h2>
+<section id="adicionado-1" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="adicionado-1"><span class="header-section-number">1.2.1</span> Adicionado</h3>
 <ul>
 <li>Estrutura completa de governança e contratos de dados sob o Arquétipo A (CRISP-ML(Q) + Data Storytelling).</li>
 <li>Módulo canônico de carregamento e tipagem determinística em <code>src/data/loader.py</code> com validação formal Pandera em <code>src/data/contracts.py</code>.</li>
@@ -234,16 +279,16 @@ window.Quarto = {
 <li>Workflows de CI/CD para GitHub Actions com lint, testes e deploy automatizado no GitHub Pages.</li>
 </ul>
 </section>
-<section id="alterado" class="level3" data-number="1.1.2">
-<h3 data-number="1.1.2" class="anchored" data-anchor-id="alterado"><span class="header-section-number">1.1.2</span> Alterado</h3>
+<section id="alterado" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="alterado"><span class="header-section-number">1.2.2</span> Alterado</h3>
 <ul>
 <li>Reorganização das bases de dados locais na pasta canônica <code>data/raw/</code> e exclusão de rastreamento no Git para manter o repositório remoto enxuto e seguro.</li>
 <li>Adição de guardas de execução graciosa nos testes de contratos para permitir execuções em ambientes de CI sem a base bruta.</li>
 <li>Versionamento do diretório de cache <code>_freeze/</code> no Quarto para viabilizar compilação estática instantânea no GitHub Pages sem kernel em tempo de execução.</li>
 </ul>
 </section>
-<section id="corrigido" class="level3" data-number="1.1.3">
-<h3 data-number="1.1.3" class="anchored" data-anchor-id="corrigido"><span class="header-section-number">1.1.3</span> Corrigido</h3>
+<section id="corrigido-1" class="level3" data-number="1.2.3">
+<h3 data-number="1.2.3" class="anchored" data-anchor-id="corrigido-1"><span class="header-section-number">1.2.3</span> Corrigido</h3>
 <ul>
 <li>Substituição do diagrama Mermaid por infográfico editorial a 300 DPI (<code>fig_timeline_leakage.png</code>), eliminando problemas de contraste e legibilidade em navegadores.</li>
 <li>Eliminação do conflito de caracteres matemáticos no Markdown que provocava fusão de colunas monetárias e colunas fantasmas sem título nas tabelas.</li>
@@ -779,31 +824,69 @@ document.addEventListener("DOMContentLoaded", function () {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>O formato baseia-se em <span class="co">[</span><span class="ot">Keep a Changelog</span><span class="co">](https://keepachangelog.com/pt-BR/1.0.0/)</span>,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>e este projeto adota o <span class="co">[</span><span class="ot">Versionamento Semântico</span><span class="co">](https://semver.org/lang/pt-BR/)</span>.</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## [1.0.0] - 2026-10-16</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## [Frente 1 — ML em Produção] — 2026-10-18</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">### Adicionado</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Estrutura completa de governança e contratos de dados sob o Arquétipo A (CRISP-ML(Q) + Data Storytelling).</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Módulo canônico de carregamento e tipagem determinística em <span class="in">`src/data/loader.py`</span> com validação formal Pandera em <span class="in">`src/data/contracts.py`</span>.</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Engenharia de atributos retroativos *point-in-time* (`src/features/builder.py`) blindada contra vazamento de dados (*data leakage*).</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cálculo dinâmico de Recência, Frequência e Valor Monetário (<span class="in">`src/features/rfm.py`</span>) com segmentação comportamental via K-Means ($K=4$, Silhouette 0,299).</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Análise empírica de sensibilidade e elasticidade de descontos (<span class="in">`src/models/pricing.py`</span>), identificando o limiar crítico de destruição de margem $D^* = 35,93\%$.</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Pipeline preditivo At-Purchase com LightGBM (<span class="in">`src/models/train.py`</span>), alcançando PR-AUC de 0,578 (lift de 4,47x sobre a taxa base) e ROC-AUC de 0,885 no teste cego temporal de 2025.</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Avaliação de custos operacionais com simulação de 9 limiares de decisão, identificando o ponto de custo mínimo global em $\tau^* = 0,55$ (economia líquida de \$92.495/ano).</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Teste de hipótese estatística via Mann-Whitney U ($p &lt; 0,0001$, Cohen's $d = 1,19$) confirmando penalidade média de -0,53 estrelas por atraso na entrega.</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Gerador de figuras editoriais em alta resolução (300 DPI, <span class="in">`aspect=1`</span>, <span class="in">`sns.despine`</span>) em <span class="in">`src/evaluation/plots.py`</span>.</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Módulo <span class="in">`src/evaluation/tables.py`</span> com 10 tabelas executivas estilizadas via <span class="in">`great_tables`</span>, integrando formatação tipada de moedas, porcentagens e realce condicional de perdas.</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Suíte automatizada com 26 testes unitários e de contratos contábeis passando em verde (<span class="in">`tests/`</span>).</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Sumário de navegação retrátil (TOC Collapsible) com alternância fluida via script JavaScript e botão flutuante para liberação de tela cheia.</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Workflows de CI/CD para GitHub Actions com lint, testes e deploy automatizado no GitHub Pages.</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Pipeline de serialização do modelo LightGBM At-Purchase calibrado via fórmula de Elkan</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  (τ* balanceado = 0,55 → τ* calibrado = 0,154857). Commit <span class="in">`4742df3`</span>.</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Módulo <span class="in">`src/models/inference.py`</span> com <span class="in">`RiskModelInference`</span> e contrato Pydantic</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="in">`RiskScenarioInput`</span> (anti-leakage via <span class="in">`PROHIBITED_LEAKAGE_COLS`</span>).</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Toggle ML/Heurístico no <span class="in">`app.py`</span>, com fallback automático para heurística caso</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  o <span class="in">`.joblib`</span> falhe. Commit <span class="in">`4742df3`</span>.</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>PDF executivo contextual (<span class="in">`src/reports/executive_pdf.py`</span>): o cabeçalho indica</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  o motor de inferência usado. Commit <span class="in">`4742df3`</span>.</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Teste de regressão cobrindo os 3 caminhos de propagação de <span class="in">`risk_source`</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  (kwarg explícito, dict embutido, precedência kwarg &gt; dict). Commit <span class="in">`d9bc0fb`</span>.</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Seção "Pipeline de Inferência ML" no <span class="in">`README.md`</span>, com métricas Out-of-Time</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  (ROC-AUC 0,9037 / PR-AUC 0,6346 / Brier 0,1674). Commit <span class="in">`7a26064`</span>.</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">### Alterado</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Reorganização das bases de dados locais na pasta canônica <span class="in">`data/raw/`</span> e exclusão de rastreamento no Git para manter o repositório remoto enxuto e seguro.</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Adição de guardas de execução graciosa nos testes de contratos para permitir execuções em ambientes de CI sem a base bruta.</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Versionamento do diretório de cache <span class="in">`_freeze/`</span> no Quarto para viabilizar compilação estática instantânea no GitHub Pages sem kernel em tempo de execução.</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">### Corrigido</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Incompatibilidade de assinatura no gerador de PDF sob reload dinâmico</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  (bug identificado em produção durante deploy). Commit <span class="in">`54f44e5`</span>.</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">### Corrigido</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Substituição do diagrama Mermaid por infográfico editorial a 300 DPI (<span class="in">`fig_timeline_leakage.png`</span>), eliminando problemas de contraste e legibilidade em navegadores.</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Eliminação do conflito de caracteres matemáticos no Markdown que provocava fusão de colunas monetárias e colunas fantasmas sem título nas tabelas.</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">### Segurança / Governança</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Hash SHA-256 do dataset de treino registrado em <span class="in">`models/metadata.json`</span>.</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Versões de runtime (<span class="in">`scikit-learn`</span>, <span class="in">`lightgbm`</span>, <span class="in">`joblib`</span>, Python) registradas.</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Anti-leakage em runtime: Pydantic com <span class="in">`extra="forbid"`</span> + asserção contra</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="in">`PROHIBITED_LEAKAGE_COLS`</span>.</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Fallback resiliente: <span class="in">`st.warning()`</span> + modo heurístico automático se o</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  modelo falhar.</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="fu">### Métricas</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>50 testes verdes (49 originais + 1 regressão).</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Ruff limpo em 48 arquivos.</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>CI verde em <span class="in">`7a26064`</span>.</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Streamlit Cloud funcional com toggle ML/Heurístico.</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## [1.0.0] - 2026-10-16</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="fu">### Adicionado</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Estrutura completa de governança e contratos de dados sob o Arquétipo A (CRISP-ML(Q) + Data Storytelling).</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Módulo canônico de carregamento e tipagem determinística em <span class="in">`src/data/loader.py`</span> com validação formal Pandera em <span class="in">`src/data/contracts.py`</span>.</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Engenharia de atributos retroativos *point-in-time* (`src/features/builder.py`) blindada contra vazamento de dados (*data leakage*).</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cálculo dinâmico de Recência, Frequência e Valor Monetário (<span class="in">`src/features/rfm.py`</span>) com segmentação comportamental via K-Means ($K=4$, Silhouette 0,299).</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Análise empírica de sensibilidade e elasticidade de descontos (<span class="in">`src/models/pricing.py`</span>), identificando o limiar crítico de destruição de margem $D^* = 35,93\%$.</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Pipeline preditivo At-Purchase com LightGBM (<span class="in">`src/models/train.py`</span>), alcançando PR-AUC de 0,578 (lift de 4,47x sobre a taxa base) e ROC-AUC de 0,885 no teste cego temporal de 2025.</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Avaliação de custos operacionais com simulação de 9 limiares de decisão, identificando o ponto de custo mínimo global em $\tau^* = 0,55$ (economia líquida de \$92.495/ano).</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Teste de hipótese estatística via Mann-Whitney U ($p &lt; 0,0001$, Cohen's $d = 1,19$) confirmando penalidade média de -0,53 estrelas por atraso na entrega.</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Gerador de figuras editoriais em alta resolução (300 DPI, <span class="in">`aspect=1`</span>, <span class="in">`sns.despine`</span>) em <span class="in">`src/evaluation/plots.py`</span>.</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Módulo <span class="in">`src/evaluation/tables.py`</span> com 10 tabelas executivas estilizadas via <span class="in">`great_tables`</span>, integrando formatação tipada de moedas, porcentagens e realce condicional de perdas.</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Suíte automatizada com 26 testes unitários e de contratos contábeis passando em verde (<span class="in">`tests/`</span>).</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Sumário de navegação retrátil (TOC Collapsible) com alternância fluida via script JavaScript e botão flutuante para liberação de tela cheia.</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Workflows de CI/CD para GitHub Actions com lint, testes e deploy automatizado no GitHub Pages.</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="fu">### Alterado</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Reorganização das bases de dados locais na pasta canônica <span class="in">`data/raw/`</span> e exclusão de rastreamento no Git para manter o repositório remoto enxuto e seguro.</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Adição de guardas de execução graciosa nos testes de contratos para permitir execuções em ambientes de CI sem a base bruta.</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Versionamento do diretório de cache <span class="in">`_freeze/`</span> no Quarto para viabilizar compilação estática instantânea no GitHub Pages sem kernel em tempo de execução.</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="fu">### Corrigido</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Substituição do diagrama Mermaid por infográfico editorial a 300 DPI (<span class="in">`fig_timeline_leakage.png`</span>), eliminando problemas de contraste e legibilidade em navegadores.</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Eliminação do conflito de caracteres matemáticos no Markdown que provocava fusão de colunas monetárias e colunas fantasmas sem título nas tabelas.</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
