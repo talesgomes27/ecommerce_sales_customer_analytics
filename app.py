@@ -351,7 +351,7 @@ kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 with kpi1:
     st.metric(
-        label="Receita Líquida Total",
+        label="Receita Líquida",
         value=f"${result.net_revenue:,.2f}",
         delta=f"Bruta: ${result.gross_revenue:,.2f}",
         delta_color="off",
@@ -379,7 +379,7 @@ with kpi3:
 with kpi4:
     ret_pct = result.estimated_return_rate * 100.0
     st.metric(
-        label="Risco Operacional Estimado",
+        label="Risco Operacional",
         value=f"{ret_pct:.1f}% Devolução",
         delta=(
             f"{result.estimated_cancellation_rate * 100:.1f}% Cancelamento"

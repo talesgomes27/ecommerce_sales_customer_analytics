@@ -12,6 +12,16 @@ Plataforma de inteligência de vendas, diagnóstico de margem de contribuição 
 
 [📊 Relatório Executivo Interativo (Quarto)](https://talesgomes27.github.io/ecommerce_sales_customer_analytics/) &nbsp;|&nbsp; [🎛️ Simulador What-If (Streamlit Cloud)](https://ecommerce-sales-customer-analytics.streamlit.app/)
 
+---
+
+## 🎥 Demonstração Interativa
+
+![Demonstração do Simulador What-If](docs/assets/demo_simulator.gif)
+
+*Simulação de cenário: Heurística segura (20% desconto) → Destruição de caixa (45% desconto) → Ativação do modelo ML (LightGBM calibrado).*
+
+---
+
 ## 📊 Origem dos Dados
 
 Este projeto utiliza o **[E-Commerce Sales Analytics Dataset](https://www.kaggle.com/datasets/datascikhan/e-commerce-sales-and-customer-analytics)**, criado por [Shair Khan](https://www.kaggle.com/datascikhan) e disponibilizado publicamente no Kaggle.
