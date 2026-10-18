@@ -5,6 +5,44 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato baseia-se em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Frente 1 — ML em Produção] — 2026-10-18
+
+### Adicionado
+
+- Pipeline de serialização do modelo LightGBM At-Purchase calibrado via fórmula de Elkan
+  (τ* balanceado = 0,55 → τ* calibrado = 0,154857). Commit `4742df3`.
+- Módulo `src/models/inference.py` com `RiskModelInference` e contrato Pydantic
+  `RiskScenarioInput` (anti-leakage via `PROHIBITED_LEAKAGE_COLS`).
+- Toggle ML/Heurístico no `app.py`, com fallback automático para heurística caso
+  o `.joblib` falhe. Commit `4742df3`.
+- PDF executivo contextual (`src/reports/executive_pdf.py`): o cabeçalho indica
+  o motor de inferência usado. Commit `4742df3`.
+- Teste de regressão cobrindo os 3 caminhos de propagação de `risk_source`
+  (kwarg explícito, dict embutido, precedência kwarg > dict). Commit `d9bc0fb`.
+- Seção "Pipeline de Inferência ML" no `README.md`, com métricas Out-of-Time
+  (ROC-AUC 0,9037 / PR-AUC 0,6346 / Brier 0,1674). Commit `7a26064`.
+
+### Corrigido
+
+- Incompatibilidade de assinatura no gerador de PDF sob reload dinâmico
+  (bug identificado em produção durante deploy). Commit `54f44e5`.
+
+### Segurança / Governança
+
+- Hash SHA-256 do dataset de treino registrado em `models/metadata.json`.
+- Versões de runtime (`scikit-learn`, `lightgbm`, `joblib`, Python) registradas.
+- Anti-leakage em runtime: Pydantic com `extra="forbid"` + asserção contra
+  `PROHIBITED_LEAKAGE_COLS`.
+- Fallback resiliente: `st.warning()` + modo heurístico automático se o
+  modelo falhar.
+
+### Métricas
+
+- 50 testes verdes (49 originais + 1 regressão).
+- Ruff limpo em 48 arquivos.
+- CI verde em `7a26064`.
+- Streamlit Cloud funcional com toggle ML/Heurístico.
+
 ## [1.0.0] - 2026-10-16
 
 ### Adicionado
