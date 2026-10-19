@@ -6,8 +6,6 @@ project:
   render:
     - index.qmd
     - reports/index.qmd
-    - docs/
-    - CHANGELOG.md
     - "!task.md"
 
 website:
@@ -18,12 +16,6 @@ website:
     left:
       - href: index.qmd
         text: "Relatório Executivo"
-      - href: docs/01-data-discovery-and-contracts.md
-        text: "Contratos de Dados"
-      - href: docs/02-PRD-and-specs.md
-        text: "Especificação & PRD"
-      - href: docs/03-architecture-and-schema.md
-        text: "Arquitetura"
 
 format:
   html:
