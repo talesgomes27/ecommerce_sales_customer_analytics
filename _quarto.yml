@@ -13,9 +13,17 @@ website:
   description: "Diagnóstico Analítico, Otimização de Margem e Predição Preventiva At-Purchase"
   site-url: "https://talesgomes27.github.io/ecommerce_sales_customer_analytics"
   navbar:
+    search: true
     left:
       - href: index.qmd
         text: "Relatório Executivo"
+    tools:
+      - icon: sliders
+        href: https://ecommerce-sales-customer-analytics.streamlit.app/
+        text: "Simulador Streamlit"
+      - icon: github
+        href: https://github.com/talesgomes27/ecommerce_sales_customer_analytics
+        text: "Código no GitHub"
 
 format:
   html:
