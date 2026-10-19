@@ -370,7 +370,7 @@ with kpi3:
     be_pct = result.break_even_discount * 100.0
     diff_be = be_pct - discount_pct_input
     st.metric(
-        label="Break-even de Desconto (D*)",
+        label="Break-even",
         value=f"{be_pct:.1f}%",
         delta=f"{diff_be:+.1f}% folga",
         delta_color="normal" if diff_be >= 0 else "inverse",
@@ -380,7 +380,7 @@ with kpi4:
     ret_pct = result.estimated_return_rate * 100.0
     st.metric(
         label="Risco Operacional",
-        value=f"{ret_pct:.1f}% Devolução",
+        value=f"{ret_pct:.1f}% Dev.",
         delta=(
             f"{result.estimated_cancellation_rate * 100:.1f}% Cancelamento"
             if risk_source == "Heurística"

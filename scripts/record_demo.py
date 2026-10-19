@@ -1,4 +1,4 @@
-"""Script de gravação automatizada de demo do simulador Streamlit.
+"""Script de gravação automatizada de demo do simulador Streamlit (6 frames).
 
 Uso:
     uv run python scripts/record_demo.py
@@ -26,11 +26,12 @@ os.environ["no_proxy"] = "localhost,127.0.0.1,*"
 STREAMLIT_URL = "http://localhost:8501"
 OUTPUT_GIF = Path("docs/assets/demo_simulator.gif")
 FRAMES_DIR = Path("/tmp/streamlit_frames")
-FRAME_DURATION_MS = 1400  # 1.4s por frame
+FRAME_DURATION_MS = 2500  # 2.5s por frame para leitura confortável (6 frames * 2.5s = 15s)
 VIEWPORT = {"width": 1440, "height": 900}
 
 # Seletores
 SELECTOR_TITLE = "text=Simulador Estratégico de Precificação"
+SELECTOR_DISCOUNT_SLIDER = "div[data-testid='stSlider'] >> nth=0"
 SELECTOR_TOGGLE_ML = "text=Principal (ML LightGBM)"
 SELECTOR_TOGGLE_HEURISTIC = "text=Comparação (Heurística Calibrada)"
 
@@ -42,7 +43,7 @@ def file_hash(path: Path) -> str:
 
 def start_streamlit() -> subprocess.Popen:
     """Inicia o Streamlit em background."""
-    print("[1/5] Iniciando Streamlit...")
+    print("[1/8] Iniciando Streamlit...")
     env = os.environ.copy()
     proc = subprocess.Popen(
         [
@@ -65,11 +66,11 @@ def start_streamlit() -> subprocess.Popen:
 
 
 def capture_frames(page: Page, frames_dir: Path) -> list[Path]:
-    """Captura frames sequenciais da interação."""
+    """Captura frames sequenciais da interação cobrindo topo e os 3 gráficos."""
     frames_dir.mkdir(parents=True, exist_ok=True)
     frames = []
 
-    print("[2/5] Aguardando título...")
+    print("[2/8] Aguardando título...")
     page.wait_for_selector(SELECTOR_TITLE, timeout=15000)
     time.sleep(2)  # Aguardar render final
 
@@ -84,20 +85,19 @@ def capture_frames(page: Page, frames_dir: Path) -> list[Path]:
     except Exception as e:
         print(f"[AVISO] Configuração inicial Heurística: {e}")
 
-    # Frame 1: Estado inicial (Heurística, 20% desconto)
-    print("[3/5] Capturando frame inicial (Heurística, 20% desconto)...")
+    # --- FRAME 1: Topo (Heurística, 20% desconto) ---
+    print("[3/8] Capturando Frame 1: Topo (Heurística segura, 20% desconto)...")
     frame_path_1 = frames_dir / "frame_01.png"
     page.screenshot(path=str(frame_path_1), full_page=False)
     frames.append(frame_path_1)
 
     # Ação 1: Mover slider de desconto para 45% (destruição de margem)
-    print("[4/5] Movendo slider de desconto para 45%...")
+    print("[4/8] Movendo slider de desconto para 45%...")
     try:
         slider_bar = page.locator("[data-testid='stSliderTickBar']").first
         slider_bar.scroll_into_view_if_needed()
         box = slider_bar.bounding_box()
         if box:
-            # 45% é exatamente o meio (50%) da barra de 0 a 90; clicamos na linha do slider
             page.mouse.click(box["x"] + box["width"] * 0.50, box["y"] - 12)
             time.sleep(2)
         else:
@@ -115,12 +115,14 @@ def capture_frames(page: Page, frames_dir: Path) -> list[Path]:
     except Exception as e:
         print(f"[AVISO] Não foi possível mover slider: {e}")
 
+    # --- FRAME 2: Topo (45% desconto, margem negativa) ---
+    print("[4/8] Capturando Frame 2: Topo (Desconto 45%, margem negativa)...")
     frame_path_2 = frames_dir / "frame_02.png"
     page.screenshot(path=str(frame_path_2), full_page=False)
     frames.append(frame_path_2)
 
     # Ação 2: Alternar para modo ML
-    print("[5/5] Alternando para modo ML...")
+    print("[5/8] Alternando para modo ML...")
     try:
         page.locator(SELECTOR_TOGGLE_ML).first.click(force=True, timeout=10000)
     except Exception as e1:
@@ -134,32 +136,73 @@ def capture_frames(page: Page, frames_dir: Path) -> list[Path]:
                     "() => { const el = Array.from(document.querySelectorAll('label, p')).find(e => e.textContent.includes('Principal (ML LightGBM)')); if (el) el.click(); }"
                 )
             except Exception as e3:
-                print(f"[AVISO] Não foi possível clicar no toggle ML após 3 tentativas: {e3}")
+                print(f"[AVISO] Não foi possível clicar no toggle ML: {e3}")
 
-    time.sleep(3)  # Streamlit processa a inferência ML
+    time.sleep(3)  # Streamlit processa inferência ML
     page.keyboard.press("Escape")
     time.sleep(0.5)
 
+    # --- FRAME 3: Topo (Modo ML ativado) ---
+    print("[5/8] Capturando Frame 3: Topo (Modo ML ativado)...")
     frame_path_3 = frames_dir / "frame_03.png"
     page.screenshot(path=str(frame_path_3), full_page=False)
     frames.append(frame_path_3)
 
-    # Validação dos 3 frames
-    if len(frames) >= 3:
-        h1 = file_hash(frames[0])
-        h2 = file_hash(frames[1])
-        h3 = file_hash(frames[2])
-        diff_1_2 = h1 != h2
-        diff_2_3 = h2 != h3
-        print(f"MD5 Frame 1: {h1[:8]}")
-        print(f"MD5 Frame 2: {h2[:8]} (Distinto do 1: {diff_1_2})")
-        print(f"MD5 Frame 3: {h3[:8]} (Distinto do 2: {diff_2_3})")
-        if not diff_1_2:
-            print("[AVISO] Frame 2 idêntico ao Frame 1.")
-        if not diff_2_3:
-            print("[AVISO] Frame 3 idêntico ao Frame 2.")
-        if diff_1_2 and diff_2_3:
-            print("[OK] Todos os 3 frames são distintos e capturam a jornada completa!")
+    # --- FRAME 4: Gráfico 1 (Curva de Sensibilidade & Break-even) ---
+    print("[6/8] Capturando Gráfico 1: Curva de Sensibilidade & Break-even...")
+    try:
+        tab1 = page.locator("text=Curva de Sensibilidade & Break-even").first
+        tab1.click(force=True, timeout=5000)
+        time.sleep(1)
+    except Exception as e:
+        print(f"[AVISO] Erro ao selecionar aba 1: {e}")
+
+    # Rolar suavemente para enquadrar os gráficos
+    page.mouse.wheel(0, 520)
+    time.sleep(2)  # Aguardar render do Plotly
+
+    frame_path_4 = frames_dir / "frame_04.png"
+    page.screenshot(path=str(frame_path_4), full_page=False)
+    frames.append(frame_path_4)
+
+    # --- FRAME 5: Gráfico 2 (Waterfall DRE) ---
+    print("[7/8] Capturando Gráfico 2: Waterfall DRE...")
+    try:
+        tab2 = page.locator("text=Decomposição DRE (Waterfall)").first
+        tab2.scroll_into_view_if_needed()
+        tab2.click(force=True, timeout=5000)
+        time.sleep(2)  # Aguardar render do Plotly Waterfall
+    except Exception as e:
+        print(f"[AVISO] Erro ao selecionar aba 2: {e}")
+
+    frame_path_5 = frames_dir / "frame_05.png"
+    page.screenshot(path=str(frame_path_5), full_page=False)
+    frames.append(frame_path_5)
+
+    # --- FRAME 6: Gráfico 3 / Tabela (Matriz Paramétrica de Simulação) ---
+    print("[8/8] Capturando Gráfico 3: Matriz Paramétrica de Simulação...")
+    try:
+        tab3 = page.locator("text=Matriz Paramétrica de Simulação").first
+        tab3.scroll_into_view_if_needed()
+        tab3.click(force=True, timeout=5000)
+        time.sleep(2)  # Aguardar render da tabela/matriz
+    except Exception as e:
+        print(f"[AVISO] Erro ao selecionar aba 3: {e}")
+
+    frame_path_6 = frames_dir / "frame_06.png"
+    page.screenshot(path=str(frame_path_6), full_page=False)
+    frames.append(frame_path_6)
+
+    # Validação dos 6 frames
+    if len(frames) == 6:
+        hashes = [file_hash(f) for f in frames]
+        all_distinct = len(set(hashes)) == len(hashes)
+        for i, h in enumerate(hashes, 1):
+            print(f"MD5 Frame {i}: {h[:8]}")
+        if all_distinct:
+            print("[OK] Todos os 6 frames são 100% distintos e capturam a jornada analítica completa!")
+        else:
+            print("[AVISO] Há frames repetidos na sequência capturada.")
 
     return frames
 
@@ -169,7 +212,7 @@ def build_gif(frames: list[Path], output: Path, duration_ms: int) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     images = [Image.open(f) for f in frames]
 
-    # Converter para paleta adaptativa para manter tamanho < 1MB
+    # Converter para paleta adaptativa mantendo tamanho otimizado (< 1 MB)
     quantized_images = [img.convert("RGB").quantize(colors=128) for img in images]
 
     quantized_images[0].save(
@@ -181,7 +224,7 @@ def build_gif(frames: list[Path], output: Path, duration_ms: int) -> None:
         optimize=True,
     )
     size_mb = output.stat().st_size / (1024 * 1024)
-    print(f"[OK] GIF gerado: {output} ({size_mb:.2f} MB, {len(frames)} frames)")
+    print(f"[OK] GIF gerado: {output} ({size_mb:.2f} MB, {len(frames)} frames, {len(frames)*duration_ms/1000:.1f}s total)")
 
 
 def main() -> None:
@@ -191,7 +234,8 @@ def main() -> None:
 
         with sync_playwright() as p:
             browser = p.chromium.launch(
-                headless=True, args=["--disable-web-security", "--no-sandbox"]
+                headless=True,
+                args=["--disable-web-security", "--no-sandbox"],
             )
             context = browser.new_context(viewport=VIEWPORT)
             page = context.new_page()
