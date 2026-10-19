@@ -200,7 +200,9 @@ def capture_frames(page: Page, frames_dir: Path) -> list[Path]:
         for i, h in enumerate(hashes, 1):
             print(f"MD5 Frame {i}: {h[:8]}")
         if all_distinct:
-            print("[OK] Todos os 6 frames são 100% distintos e capturam a jornada analítica completa!")
+            print(
+                "[OK] Todos os 6 frames são 100% distintos e capturam a jornada analítica completa!"
+            )
         else:
             print("[AVISO] Há frames repetidos na sequência capturada.")
 
@@ -224,7 +226,9 @@ def build_gif(frames: list[Path], output: Path, duration_ms: int) -> None:
         optimize=True,
     )
     size_mb = output.stat().st_size / (1024 * 1024)
-    print(f"[OK] GIF gerado: {output} ({size_mb:.2f} MB, {len(frames)} frames, {len(frames)*duration_ms/1000:.1f}s total)")
+    print(
+        f"[OK] GIF gerado: {output} ({size_mb:.2f} MB, {len(frames)} frames, {len(frames) * duration_ms / 1000:.1f}s total)"
+    )
 
 
 def main() -> None:
